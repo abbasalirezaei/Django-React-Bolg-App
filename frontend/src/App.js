@@ -6,6 +6,8 @@ import PrivateRoute from "./utils/PrivateRoute"
 import { AuthProvider } from './context/AuthContext'
 import Nav from './components/Nav'
 import Home from './components/Home'
+import Contact from './components/Contact'
+import About from './components/About'
 import NotFound from './components/NotFound'
 
 // Blog
@@ -34,13 +36,15 @@ function App() {
 
 
           <Route component={BlogList} path="/bloglist" exact />
-          <Route component={CategoryList } path="/categories"  />
-          <Route component={BlogTag } path="/blogs/:tag"  />
+          <Route component={CategoryList } path="/categories"  exact />
+          <Route component={BlogTag } path="/blogs/:tag"  exact />
 
-          <Route component={BlogDetail}    path="/blog/:product_slug/:product_id" />
-					<Route component={BlogCategory}  path="/category/:category_slug/:category_id"  />
+          <Route component={BlogDetail}    path="/blog/:product_slug/:product_id" exact />
+					<Route component={BlogCategory}  path="/category/:category_slug/:category_id"  exact />
 
           <Route component={Home} path="/" exact />
+          <Route component={About} path="/about" exact />
+          <Route component={Contact} path="/contact" exact />
           <Route path="*" component={NotFound } />
         </Switch>
       </AuthProvider>
