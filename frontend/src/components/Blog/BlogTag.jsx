@@ -3,7 +3,7 @@ import Card from './Card'
 import { Link } from 'react-router-dom'
 import { useParams } from "react-router-dom";
 export default function BlogTag() {
-    const baseurl="http://127.0.0.1:8000/api/v1";
+    const baseurl="http://127.0.0.1:8000/api/posts/v1";
 	const [blogs,setBlogs]=useState([]);
 	const [totalResult,setTotalResult]=useState(0);
 
