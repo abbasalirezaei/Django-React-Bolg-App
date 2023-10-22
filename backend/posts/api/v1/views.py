@@ -21,12 +21,19 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .services.like_view import press_like_to_product
 from .serializers import (
-   PostSerializer,CategorySerializer
+   PostSerializer,
+   CategorySerializer,
+   LikeGetSerializer,
+   LikeSerializer,
+   
 )
 
 from posts.models import (
-    Post,Category
+    Post,
+    Category,
+    BlogLike
 
 )
 
@@ -42,6 +49,7 @@ class PostList(generics.ListCreateAPIView):
         return queryset
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset=Post.objects.all()
+    # permission_classes=[IsAuthenticated]
     serializer_class=PostSerializer
     lookup_field = 'pk'
 
@@ -61,3 +69,32 @@ class TagBlogList(generics.ListCreateAPIView):
         return queryset
 
 
+
+class LikeView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        if kwargs:
+            queryset = BlogLike.objects.filter(blog_item__pk=kwargs["blog_item_pk"])
+            serializer = LikeGetSerializer(queryset, many=True)
+        else:
+            queryset = BlogLike.objects.all()
+            serializer = LikeGetSerializer(queryset, many=True)
+
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        
+      
+        user=User.objects.get(pk=int(request.data["user_id"]))
+        post=Post.objects.get(pk=int(request.data["blog_item"]))
+        like = BlogLike.objects.filter(user=user, blog_item=post)
+        if like:
+            like.like_status="false"
+            like.delete()
+            msg=False
+        else:
+            BlogLike.objects.create(user=user ,blog_item=post,like_status=True)  
+            msg=True
+        return Response({"msg":msg})
+ 

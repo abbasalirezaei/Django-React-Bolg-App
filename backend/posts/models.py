@@ -62,3 +62,12 @@ class Post(models.Model):
         
         return tagList
     
+
+class BlogLike(models.Model):
+    user = models.ForeignKey(User, verbose_name=("user"), on_delete=models.CASCADE)
+    blog_item = models.ForeignKey(Post, on_delete=models.CASCADE)
+    like_status=models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"BlogLike({self.user}, {self.blog_item})"
+

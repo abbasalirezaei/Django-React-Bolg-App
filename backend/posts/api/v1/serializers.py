@@ -1,10 +1,21 @@
 from rest_framework import serializers
-from posts.models import Post,Category 
+from posts.models import( 
+    Post,
+    Category,
+    BlogLike
+    )
 
-# class PostLikeSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = PostLike
-#         fields = '__all__'
+
+class LikeGetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlogLike
+        fields = "__all__"
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlogLike
+        fields = ("blog_item",)
 
 
 class PostSerializer(serializers.ModelSerializer):

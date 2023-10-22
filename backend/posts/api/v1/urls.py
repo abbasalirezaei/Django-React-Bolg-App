@@ -9,5 +9,7 @@ urlpatterns = [
 
     path('categories/',views.CategoryList.as_view()),
 
-
+    path("likes/<blog_item_pk>", views.LikeView.as_view(), name="get_likes_for_blog"),
+    path("likes/", views.LikeView.as_view(), name="get_all_likes"),
+    path("likes/create/", views.LikeView.as_view(), name="create_like"),
 ]

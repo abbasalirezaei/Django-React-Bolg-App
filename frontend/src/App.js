@@ -39,7 +39,7 @@ function App() {
           <Route component={CategoryList } path="/categories"  exact />
           <Route component={BlogTag } path="/blogs/:tag"  exact />
 
-          <Route component={BlogDetail}    path="/blog/:product_slug/:product_id" exact />
+          <PrivateRoute component={BlogDetail}    path="/blog/:product_slug/:product_id" exact />
 					<Route component={BlogCategory}  path="/category/:category_slug/:category_id"  exact />
 
           <Route component={Home} path="/" exact />

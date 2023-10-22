@@ -1,9 +1,19 @@
 from django.contrib import admin
-from .models import Post,Category,Author
+from .models import (
+    Post,
+    Category,
+    Author,
+    BlogLike
+    )
+
 # Register your models here.
 
 # class PostLike(admin.TabularInline):
 #     model = PostLike
+class LikeAdmin(admin.ModelAdmin):
+
+    list_display = ("id", "user", "blog_item")
+    list_display_links = ("id", "user", "blog_item")
 
 
 class PostAdmin(admin.ModelAdmin):
@@ -27,3 +37,4 @@ class CategoryAdmin(admin.ModelAdmin):
 admin.site.register(Post, PostAdmin)
 admin.site.register(Author)
 admin.site.register(Category, CategoryAdmin)
+admin.site.register(BlogLike, LikeAdmin)
