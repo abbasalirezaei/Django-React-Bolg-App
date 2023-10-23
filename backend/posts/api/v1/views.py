@@ -154,9 +154,10 @@ class CommentBlogView(APIView):
 
     def post(self, request, *args, **kwargs):
         serializer = CommentPostSerializer(data=request.data)
+        user=User.objects.get(pk=int(request.data["user_id"]))
 
         if serializer.is_valid():
-            comment = create_comment(**serializer.data, user=request.user)
+            comment = create_comment(**serializer.data, user=user)
             return Response(
                 CommentGetSerializer(instance=comment).data,
                 status=status.HTTP_201_CREATED,

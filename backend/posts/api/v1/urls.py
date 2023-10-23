@@ -26,8 +26,8 @@ urlpatterns = [
     # comments 
 
     path("<blog_item>/comments/", views.CommentBlogView.as_view(), name="get_blog_comments"),
-    # path("blogs/comments/", CommentBlogView.as_view(), name="get_all_comments"),
-    # path("blog/comment/create/", CommentBlogView.as_view(), name="create_blog_comment"),
+    path("comments/", views.CommentBlogView.as_view(), name="get_all_comments"),
+    path("comment/create/", views.CommentBlogView.as_view(), name="create_blog_comment"),
     # path("comment/<pk>/update/", CommentBlogView.as_view(), name="update_comment"),
     # path("comment/<pk>/delete/", CommentBlogView.as_view(), name="delete_comment"),
     

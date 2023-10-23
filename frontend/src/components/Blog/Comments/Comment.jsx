@@ -1,11 +1,25 @@
 import React, { useEffect, useState } from 'react'
 import CommentArticle from './CommentArticle';
 import CommentReply from './CommentReply';
-
+import axios from "axios";
+import useAxios from '../../../utils/useAxios';
+import jwtDecode from "jwt-decode";
 export default function Comment(props) {
     const baseurl = "http://127.0.0.1:8000/api/posts/v1";
     const [comments, setComments] = useState([]);
+    const [commentText,setcommentText]=useState("")
 
+    const api = useAxios();
+	const token = localStorage.getItem("authTokens")
+
+	if (token) {
+		const decode = jwtDecode(token)
+		var user_id = decode.user_id
+		var username = decode.username
+		var full_name = decode.full_name
+		var image = decode.image
+
+	}
     useEffect(() => {
         fetchComments(baseurl + "/" + props.blog_id + '/comments/');
 
@@ -16,11 +30,40 @@ export default function Comment(props) {
         fetch(url)
             .then((response) => response.json())
             .then((data) => {
-                console.log(data);
+                // console.log(data);
                 setComments(data)
 
             });
     }
+    // console.log(commentText);
+
+    const handleSubmit = (event) => {
+		event.preventDefault();
+        const form={
+            "blog_item":props.blog_id,
+            'blog_body':commentText,
+            'parent':null,
+            "user_id": user_id,
+        }
+		// console.log(form);
+
+        axios({
+			method: 'post',
+			url: baseurl + '/comment/create/',
+			data: form,
+			headers: { "Content-Type": "multipart/form-data" },
+		}).then(
+			function (response){
+				console.log(response);
+			}
+		);
+        window.location.reload();
+
+		// Reset form fields
+	  };
+
+
+    
     return (
         <div>
             <section class="bg-gray-200 dark:bg-gray-900 py-8 lg:py-16 antialiased">
@@ -29,12 +72,14 @@ export default function Comment(props) {
                         <h2 class="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white">Discussion (20)</h2>
                     </div>
 
-                    <form class="mb-6">
+                    <form class="mb-6" onSubmit={handleSubmit}>
                         <div class="py-2 px-4 mb-4 bg-white rounded-lg rounded-t-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                             <label for="comment" class="sr-only">Your comment</label>
                             <textarea id="comment" rows="6"
                                 class="px-0 w-full text-sm text-gray-900 border-0 focus:ring-0 focus:outline-none dark:text-white dark:placeholder-gray-400 dark:bg-gray-800"
-                                placeholder="Write a comment..." required></textarea>
+                                placeholder="Write a comment..." required
+                                onChange={(e)=>setcommentText(e.target.value)}
+                                ></textarea>
                         </div>
                         <button type="submit"
                             class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-red-400 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-gray-500">
