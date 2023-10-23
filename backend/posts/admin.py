@@ -22,7 +22,7 @@ class PostAdmin(admin.ModelAdmin):
     search_fields = ['content', "user__username", "user__email"]
     # this to dispaly USER Content
     # "__str__" dysplay object(id) by defualt
-    list_display = ["id", 'title', 'slug']
+    list_display = ["id", 'title', 'slug','views']
 
     class Meta:
         model = Post

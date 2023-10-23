@@ -25,7 +25,8 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model=Post
         fields =[
-            'id','title','slug','author','body','categories','status','created_at','updated_at','img','get_tag_list'
+            'id','title','slug','author','body','categories','status','created_at','updated_at','img',
+            'get_tag_list','views'
                     ]
         
     def __init__(self, *args, **kwargs):

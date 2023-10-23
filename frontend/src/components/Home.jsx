@@ -1,8 +1,53 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 // import Card from './Card'
 import { Link } from 'react-router-dom'
-
+import axios from 'axios';
+import Card from './Blog/Card';
 export default function Home() {
+    const baseurl = "http://127.0.0.1:8000/api/posts/v1";
+    const [mostViewPosts, setmostViewPosts] = useState([]);
+    const [mostLikedPosts, setmostLikedPosts] = useState([]);
+    useEffect(() => {
+        fetchMostViewPost(baseurl + '/most-viewed-posts');
+        fetchPopularPost(baseurl + '/most-liked-posts');
+
+    }, []);
+    function fetchMostViewPost(url) {
+        // Fetch popular posts
+        axios.get(url)
+            .then(response => {
+                console.log(response.data);
+                setmostViewPosts(response.data)
+                // Handle the response and update your component's state with the popular posts data.
+            })
+            .catch(error => {
+                // Handle errors
+            });
+    }
+
+    function fetchPopularPost(url) {
+        // Fetch popular posts
+        axios.get(url)
+            .then(response => {
+                console.log(response.data);
+                setmostLikedPosts(response.data)
+                // Handle the response and update your component's state with the popular posts data.
+            })
+            .catch(error => {
+                // Handle errors
+            });
+    }
+
+
+    // function fetchData(url) {
+    //     fetch(url)
+    //         .then((response) => response.json())
+    //         .then((data) => {
+
+    //             setBlogs(data)
+    //             setTotalResult(data.count)
+    //         });
+    // }
     return (
         <main className='px-16 mx-5'>
 
@@ -13,43 +58,15 @@ export default function Home() {
                     <Link to="/bloglist">View all Blog</Link>
                 </div>
                 {/* Cards go here */}
-                
+
                 <div className='mt-8 grid md:grid-cols-4 gap-3'>
-
-                <div className="max-w-lg mx-auto">
-                    <div className="bg-white shadow-md border border-gray-200 rounded-lg max-w-sm mb-5">
-                        <a href="#">
-                            <img className="rounded-t-lg" src="https://www.indianhealthyrecipes.com/wp-content/uploads/2021/07/hakka-noodles-recipe.jpg" alt="" />
-                        </a>
-                        <div className="p-5">
-                            <a href="#">
-                                <h5 className="text-gray-900 font-bold text-2xl tracking-tight mb-2">Noteworthy technology acquisitions 2021</h5>
-                            </a>
-                            <p className="font-normal text-gray-700 mb-3">Here are the biggest enterprise technology acquisitions of 2021 so far, in reverse chronological order.</p>
-                            <Link className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center inline-flex items-center"
-                            to="/blogdetail">
-                                Read more
-                            </Link>
-                        </div>
-                    </div>
-                </div><div className="max-w-lg mx-auto">
-                    <div className="bg-white shadow-md border border-gray-200 rounded-lg max-w-sm mb-5">
-                        <a href="#">
-                            <img className="rounded-t-lg" src="https://www.indianhealthyrecipes.com/wp-content/uploads/2021/07/hakka-noodles-recipe.jpg" alt="" />
-                        </a>
-                        <div className="p-5">
-                            <a href="#">
-                                <h5 className="text-gray-900 font-bold text-2xl tracking-tight mb-2">Noteworthy technology acquisitions 2021</h5>
-                            </a>
-                            <p className="font-normal text-gray-700 mb-3">Here are the biggest enterprise technology acquisitions of 2021 so far, in reverse chronological order.</p>
-                            <Link className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center inline-flex items-center"
-                            to="/blogdetail">
-                                Read more
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-
+                    {
+                        mostViewPosts.map((blog, index) => {
+                            return (
+                                <Card key={index} blog={blog} />
+                            )
+                        })
+                    }
 
 
                 </div>
@@ -60,56 +77,15 @@ export default function Home() {
                 </div>
                 {/* Cards go here */}
                 <div className='mt-8 grid md:grid-cols-4 gap-3'>
-                <div className="max-w-lg mx-auto">
-                    <div className="bg-white shadow-md border border-gray-200 rounded-lg max-w-sm mb-5">
-                        <a href="#">
-                            <img className="rounded-t-lg" src="https://www.indianhealthyrecipes.com/wp-content/uploads/2021/07/hakka-noodles-recipe.jpg" alt="" />
-                        </a>
-                        <div className="p-5">
-                            <a href="#">
-                                <h5 className="text-gray-900 font-bold text-2xl tracking-tight mb-2">Noteworthy technology acquisitions 2021</h5>
-                            </a>
-                            <p className="font-normal text-gray-700 mb-3">Here are the biggest enterprise technology acquisitions of 2021 so far, in reverse chronological order.</p>
-                            <Link className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center inline-flex items-center"
-                            to="/blogdetail">
-                                Read more
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-                <div className="max-w-lg mx-auto">
-                    <div className="bg-white shadow-md border border-gray-200 rounded-lg max-w-sm mb-5">
-                        <a href="#">
-                            <img className="rounded-t-lg" src="https://www.indianhealthyrecipes.com/wp-content/uploads/2021/07/hakka-noodles-recipe.jpg" alt="" />
-                        </a>
-                        <div className="p-5">
-                            <a href="#">
-                                <h5 className="text-gray-900 font-bold text-2xl tracking-tight mb-2">Noteworthy technology acquisitions 2021</h5>
-                            </a>
-                            <p className="font-normal text-gray-700 mb-3">Here are the biggest enterprise technology acquisitions of 2021 so far, in reverse chronological order.</p>
-                            <Link className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center inline-flex items-center"
-                            to="/blogdetail">
-                                Read more
-                            </Link>
-                        </div>
-                    </div>
-                </div><div className="max-w-lg mx-auto">
-                    <div className="bg-white shadow-md border border-gray-200 rounded-lg max-w-sm mb-5">
-                        <a href="#">
-                            <img className="rounded-t-lg" src="https://www.indianhealthyrecipes.com/wp-content/uploads/2021/07/hakka-noodles-recipe.jpg" alt="" />
-                        </a>
-                        <div className="p-5">
-                            <a href="#">
-                                <h5 className="text-gray-900 font-bold text-2xl tracking-tight mb-2">Noteworthy technology acquisitions 2021</h5>
-                            </a>
-                            <p className="font-normal text-gray-700 mb-3">Here are the biggest enterprise technology acquisitions of 2021 so far, in reverse chronological order.</p>
-                            <Link className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center inline-flex items-center"
-                            to="/blogdetail">
-                                Read more
-                            </Link>
-                        </div>
-                    </div>
-                </div>
+                    
+                {
+                        mostLikedPosts.map((blog, index) => {
+                            return (
+                                <Card key={index} blog={blog} />
+                            )
+                        })
+                    }
+
                 </div>
                 <div className='flex justify-center my-2'>
                     <div className='bg-secondary-100 text-secondary-200 btn hover:shadow-inner transform hover:scale-125 hover:bg-opacity-50'>Load More</div>

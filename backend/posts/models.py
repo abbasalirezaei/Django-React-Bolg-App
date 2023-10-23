@@ -45,7 +45,21 @@ class Post(models.Model):
     img=models.ImageField(upload_to="blog_image/",blank=True,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # likes = models.ManyToManyField(User,blank=True,related_name='likes')
+    views = models.IntegerField(default=0)
+    viewed_ips = models.TextField(blank=True)
+
+
+    def increment_views(self, ip_address):
+        # بررسی آی‌پی در لیست آی‌پی‌های مشاهده کننده
+        if ip_address not in self.viewed_ips.split(','):
+            self.views += 1
+            self.viewed_ips += f'{ip_address},'
+            self.save()
+
+    def increase_views(self):
+        self.views +=1
+        self.save()
+        
     class Meta:
         ordering = ("-created_at",)
 

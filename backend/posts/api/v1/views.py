@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from django.db import IntegrityError
-
+from ipware import get_client_ip
 
 
 from rest_framework import status
@@ -22,6 +22,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .services.like_view import press_like_to_product
+from django.db.models import Count
 from .serializers import (
    PostSerializer,
    CategorySerializer,
@@ -52,15 +53,39 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes=[IsAuthenticated]
     serializer_class=PostSerializer
     lookup_field = 'pk'
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.increase_views()
+        """
+        when deply it in a host you can increse by evey ip
+        """
+        # Get the user's IP address
+        # ip_address, _ = get_client_ip(request)
 
+
+        # if ip_address:  # If IP is detected
+        #     instance.increment_views(ip_address)  # Call the increment_views method
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 class CategoryList(generics.ListCreateAPIView):
     queryset=Category.objects.all()
     # permission_classes=[IsAuthenticated]
     serializer_class=CategorySerializer
 
-# Blog tags list
-  
+
+# popular post
+
+class MostViewedPostsAPIView(generics.ListAPIView):
+    queryset = Post.objects.filter(status=True).order_by('-views')[:8]  # Query for popular posts
+    serializer_class = PostSerializer
+
+class MostLikedPostsAPIView(generics.ListAPIView):
+    queryset = Post.objects.filter(status=True).annotate(like_count=Count('bloglike')).order_by('-like_count')[:8]
+    serializer_class = PostSerializer
+# Blog tags list  
 class TagBlogList(generics.ListCreateAPIView):
     serializer_class=PostSerializer
     def get_queryset(self):
