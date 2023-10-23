@@ -3,7 +3,9 @@ from .models import (
     Post,
     Category,
     Author,
-    BlogLike
+    BlogLike,
+    BlogComment,
+CommentLike,
     )
 
 # Register your models here.
@@ -38,3 +40,18 @@ admin.site.register(Post, PostAdmin)
 admin.site.register(Author)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(BlogLike, LikeAdmin)
+
+class CommentBlogAdmin(admin.ModelAdmin):
+
+    list_display = ("id", "user", "blog_item", "blog_body")
+    list_display_links = ("id", "user", "blog_item")
+
+
+class CommentLikeAdmin(admin.ModelAdmin):
+
+    list_display = ("id", "user", "comment_blog_item")
+    list_display_links = ("id", "user", "comment_blog_item")
+
+
+admin.site.register(BlogComment, CommentBlogAdmin)
+admin.site.register(CommentLike, CommentLikeAdmin)

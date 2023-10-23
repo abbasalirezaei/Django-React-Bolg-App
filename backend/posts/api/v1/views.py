@@ -22,19 +22,28 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .services.like_view import press_like_to_product
+from .services.comment_view import create_comment
+
 from django.db.models import Count
 from .serializers import (
    PostSerializer,
    CategorySerializer,
    LikeGetSerializer,
    LikeSerializer,
+   BlogComment,
+   CommentGetSerializer,
+   CommentPostSerializer,
+   CommentPutSerializer
+
    
 )
 
 from posts.models import (
     Post,
     Category,
-    BlogLike
+    BlogLike,
+    BlogComment,
+    CommentLike
 
 )
 
@@ -123,3 +132,94 @@ class LikeView(APIView):
             msg=True
         return Response({"msg":msg})
  
+
+
+#  =========== comments views
+
+
+class CommentBlogView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+
+        if kwargs:
+            queryset = BlogComment.objects.filter(
+                blog_item__pk=kwargs["blog_item"], parent=None
+            )
+            serializer = CommentGetSerializer(queryset, many=True)
+        else:
+            queryset = BlogComment.objects.all()
+            serializer = CommentGetSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        serializer = CommentPostSerializer(data=request.data)
+
+        if serializer.is_valid():
+            comment = create_comment(**serializer.data, user=request.user)
+            return Response(
+                CommentGetSerializer(instance=comment).data,
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk):
+        post = BlogComment.objects.get(pk=pk)
+        data = {**request.data, "user": request.user.id}
+        serializer = CommentPutSerializer(instance=post, data=data)
+        if serializer.is_valid():
+            instance = serializer.save()
+            newSerializer = CommentGetSerializer(instance=instance)
+            return Response(newSerializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, requset, pk):
+        post = BlogComment.objects.get(pk=pk)
+        post.delete()
+        return Response({"message": "Item was succesfully deleted"})
+
+
+# class CommentLikeView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request, *args, **kwargs):
+#         if kwargs:
+#             queryset = CommentLike.objects.filter(
+#                 comment_blog_item__blog_item__pk=kwargs["comment_blog_item_pk"]
+#             )
+#             serializer = CommentLikeGetSerializer(queryset, many=True)
+#         else:
+#             queryset = CommentLike.objects.all()
+#             serializer = CommentLikeGetSerializer(queryset, many=True)
+
+#         return Response(serializer.data)
+
+#     def post(self, request, *args, **kwargs):
+#         serializer = CommentLikePostSerializer(data=request.data)
+#         if serializer.is_valid():
+#             like_id = press_like_to_comment(request, request.data["comment_blog_item"])
+#             return Response(
+#                 {**serializer.data, "like_id": like_id}, status=status.HTTP_201_CREATED
+#             )
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# @api_view(["GET"])
+# @permission_classes([IsAuthenticated])
+# def check_comment_like_exists(request, comment_id):
+#     user = request.user
+#     try:
+#         CommentLike.objects.get(user=user, comment_blog_item__id=comment_id)
+#         return Response({"result": True})
+#     except Exception as e:
+#         return Response({"result": False})
+
+
+# @api_view(["GET"])
+# @permission_classes([IsAuthenticated])
+# def get_blogs_for_user(request):
+#     user = request.user
+#     queryset = user.blogitem_set.all()
+
+#     serializer = BlogSerializer(queryset, many=True)
+#     return Response(serializer.data)

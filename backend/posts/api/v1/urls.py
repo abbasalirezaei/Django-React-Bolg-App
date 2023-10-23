@@ -9,11 +9,26 @@ urlpatterns = [
 
     path('categories/',views.CategoryList.as_view()),
 
-    path("likes/<blog_item_pk>", views.LikeView.as_view(), name="get_likes_for_blog"),
+    #Likes
+
+
+    path("likes/<blog_item_pk>/", views.LikeView.as_view(), name="get_likes_for_blog"),
     path("likes/", views.LikeView.as_view(), name="get_all_likes"),
     path("likes/create/", views.LikeView.as_view(), name="create_like"),
     
+
+    # feed
+     
     path('most-viewed-posts/', views.MostViewedPostsAPIView.as_view(), name='most_viewed_posts_api'),
     path('most-liked-posts/', views.MostLikedPostsAPIView.as_view(), name='most_liked_posts_api'),
 
+
+    # comments 
+
+    path("<blog_item>/comments/", views.CommentBlogView.as_view(), name="get_blog_comments"),
+    # path("blogs/comments/", CommentBlogView.as_view(), name="get_all_comments"),
+    # path("blog/comment/create/", CommentBlogView.as_view(), name="create_blog_comment"),
+    # path("comment/<pk>/update/", CommentBlogView.as_view(), name="update_comment"),
+    # path("comment/<pk>/delete/", CommentBlogView.as_view(), name="delete_comment"),
+    
 ]

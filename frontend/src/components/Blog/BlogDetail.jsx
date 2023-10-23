@@ -5,6 +5,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import useAxios from "../../utils/useAxios";
 import jwtDecode from "jwt-decode";
+import Comment from "./Comments/Comment";
+// import CommentArticle from "./Comments/CommentArticle";
 const swal = require('sweetalert2')
 
 export default function BlogDetail() {
@@ -240,6 +242,7 @@ export default function BlogDetail() {
 							</div>
 
 						</div>
+						<Comment  blog_id={product_id}/>
 
 						{/* <button onClick={handleLike}>Like</button> */}
 
