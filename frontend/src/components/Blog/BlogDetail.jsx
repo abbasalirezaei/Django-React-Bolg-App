@@ -128,7 +128,6 @@ export default function BlogDetail() {
 		fetch(url)
 			.then((response) => response.json())
 			.then((data) => {
-				console.log(data);
 				setBlog(data)
 				setProductImages(data.product_imaags)
 				setBlogTags(data.get_tag_list)

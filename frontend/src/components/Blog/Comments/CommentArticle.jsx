@@ -1,8 +1,16 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import CommentReply from './CommentReply';
+import axios from "axios";
+import useAxios from '../../../utils/useAxios';
+import jwtDecode from "jwt-decode";
 
 export default function CommentArticle(props) {
-    
+    // console.log(props.comment)
+
+    const baseurl = "http://127.0.0.1:8000/api/posts/v1";
+    const [showReplyForm, setshowReplyForm] = useState(false)
+    // const [comments, setComments] = useState([]);
+    const [commentText, setcommentText] = useState("")
     // {
     //     "id": 1,
     //     "username": "Abbasali",
@@ -12,6 +20,52 @@ export default function CommentArticle(props) {
     //     "blog_item": 5,
     //     "parent": null
     // }
+
+    const [commentChild, setCommentChild] = useState(props.comment.children_comments)
+
+
+    const api = useAxios();
+    const token = localStorage.getItem("authTokens")
+
+    if (token) {
+        const decode = jwtDecode(token)
+        var user_id = decode.user_id
+        var username = decode.username
+        var full_name = decode.full_name
+        var image = decode.image
+
+    }
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const form = {
+            "blog_item": props.blog_id,
+            'blog_body': commentText,
+            'parent': props.comment.id,
+            "user_id": user_id,
+        }
+        // console.log(form);
+
+        axios({
+            method: 'post',
+            url: baseurl + '/comment/create/',
+            data: form,
+            headers: { "Content-Type": "multipart/form-data" },
+        }).then(
+            function (response) {
+                setCommentChild(
+                    [...commentChild, response.data]
+                )
+            }
+        );
+        setcommentText("")
+        // window.location.reload();
+
+        // Reset form fields
+    };
+    // setComments(
+    //     [...comments, response.data]
+    // )
     return (
         <>
 
@@ -23,8 +77,9 @@ export default function CommentArticle(props) {
                             class="mr-2 w-6 h-6 rounded-full"
                             src="https://flowbite.com/docs/images/people/profile-picture-2.jpg"
                             alt="Michael Gough" />{props.comment.username}</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400"><time pubdate dateTime="2022-02-08"
-                            title="February 8th, 2022">Feb. 8, 2022</time></p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            <time pubdate dateTime="2022-02-08"
+                                title="February 8th, 2022">Feb. 8, 2022</time></p>
                     </div>
 
                     <button id="dropdownComment1Button" data-dropdown-toggle="dropdownComment1"
@@ -62,8 +117,36 @@ export default function CommentArticle(props) {
                     {props.comment.blog_body}
 
                 </p>
+
+                {
+                    showReplyForm &&
+                    // <section class="bg-gray-200 dark:bg-gray-900 py-8 lg:py-16 antialiased">
+                    <div class="max-w-2xl mx-auto px-4">
+
+                        {/* onSubmit={handleSubmit} */}
+                        <form class="mb-6" onSubmit={handleSubmit}>
+                            <div class="py-2 px-4 mb-4 bg-white rounded-lg rounded-t-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                                <label for="comment" class="sr-only">Your comment</label>
+                                <textarea id="comment" rows="6"
+                                    class="px-0 w-full text-sm text-gray-900 border-0 focus:ring-0 focus:outline-none dark:text-white dark:placeholder-gray-400 dark:bg-gray-800"
+                                    placeholder="Write your Reply..." required
+                                    onChange={(e) => setcommentText(e.target.value)}
+                                    value={commentText}
+                                ></textarea>
+                            </div>
+                            <button type="submit"
+                                class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-red-400 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-gray-500">
+                                Reply
+                            </button>
+                        </form>
+
+
+                    </div>
+                    // </section> */}
+                }
                 <div class="flex items-center mt-4 space-x-4">
                     <button type="button"
+                        onClick={() => setshowReplyForm(!showReplyForm)}
                         class="flex items-center text-sm text-gray-500 hover:underline dark:text-gray-400 font-medium">
                         <svg class="mr-1.5 w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
                             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5h5M5 8h2m6-3h2m-5 3h6m2-7H2a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3v5l5-5h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z" />
@@ -92,15 +175,18 @@ export default function CommentArticle(props) {
 
                     </button>
 
-                    
+
                 </div>
             </article>
             {
-                props.comment.children_comments.length != 0 && 
-                props.comment.children_comments.map((item,index)=>{
-                    return <CommentReply comment={item} key={index} />
+                commentChild.length != 0 &&
+                commentChild.map((item, index) => {
+                    return <CommentReply comment={item} key={index}
+                        // commentChild={commentChild}
+                        // setCommentChild={setCommentChild}
+                    />
                 })
-                
+
             }
         </>
     )
