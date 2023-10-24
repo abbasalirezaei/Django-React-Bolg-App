@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .services.comment_view import get_user_by_id
-
+from api.models import Profile
+from api.serializers import ProfileSerializer
 from posts.models import( 
     Post,
     Category,
@@ -67,12 +68,27 @@ class CommentGetSerializer(serializers.ModelSerializer):
 
     username = serializers.SerializerMethodField("get_username")
     children_comments = serializers.SerializerMethodField("get_children_comments")
-
+    profile = serializers.SerializerMethodField("get_profile")
     def get_username(self, foo):
         return foo.user.username
+    
+    def get_profile(self, foo):
+        profile = foo.user.profile
+        request = self.context.get('request')
+        image_url = profile.image.url if profile.image else None
 
+        if image_url and request:
+            image_url = request.build_absolute_uri(image_url)
+
+        return {
+            "full_name": profile.full_name,
+            "bio": profile.bio,
+            "image": image_url,
+            "verified": profile.verified,
+        }
+        
     def get_children_comments(self, foo):
-
+        request = self.context.get('request')
         return [
             {
                 "id": el.id,
@@ -81,6 +97,7 @@ class CommentGetSerializer(serializers.ModelSerializer):
                 "blog_body": el.blog_body,
                 "parent_id": el.parent_id,
                 "username": get_user_by_id(el.user_id).username,
+                "profile_image": request.build_absolute_uri(get_user_by_id(el.user_id).profile.image.url) if get_user_by_id(el.user_id).profile.image else None,
             }
             for el in foo.children()
         ]

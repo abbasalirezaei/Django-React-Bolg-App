@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 User = get_user_model()
-
+from datetime import datetime  
 # Create your models here.
 
 
@@ -82,6 +82,7 @@ class BlogLike(models.Model):
     blog_item = models.ForeignKey(Post, on_delete=models.CASCADE)
     like_status=models.BooleanField(default=False)
 
+
     def __str__(self):
         return f"BlogLike({self.user}, {self.blog_item})"
 
@@ -91,6 +92,8 @@ class BlogComment(models.Model):
     user = models.ForeignKey(User, verbose_name=("user"), on_delete=models.CASCADE, null=True)
     blog_item = models.ForeignKey(Post, on_delete=models.CASCADE)
     blog_body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True,blank=True,null=True)
+    updated_at = models.DateTimeField(auto_now=True,blank=True,null=True)
 
     parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True)
 

@@ -11,6 +11,7 @@ def get_user_by_id(id):
     return User.objects.get(pk=id)
 
 
+
 def create_comment(user, blog_item, blog_body, parent):
     blog_item = get_blog_by_id(blog_item)
     parent_obj = None

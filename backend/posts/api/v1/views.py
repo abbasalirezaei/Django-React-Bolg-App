@@ -136,7 +136,6 @@ class LikeView(APIView):
 
 #  =========== comments views
 
-
 class CommentBlogView(APIView):
     # permission_classes = [IsAuthenticated]
 
@@ -146,20 +145,20 @@ class CommentBlogView(APIView):
             queryset = BlogComment.objects.filter(
                 blog_item__pk=kwargs["blog_item"], parent=None
             )
-            serializer = CommentGetSerializer(queryset, many=True)
+            serializer = CommentGetSerializer(queryset, many=True, context={'request': request})
         else:
             queryset = BlogComment.objects.all()
-            serializer = CommentGetSerializer(queryset, many=True)
+            serializer = CommentGetSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
         serializer = CommentPostSerializer(data=request.data)
-        user=User.objects.get(pk=int(request.data["user_id"]))
+        user = User.objects.get(pk=int(request.data["user_id"]))
 
         if serializer.is_valid():
             comment = create_comment(**serializer.data, user=user)
             return Response(
-                CommentGetSerializer(instance=comment).data,
+                CommentGetSerializer(instance=comment, context={'request': request}).data,
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -170,14 +169,55 @@ class CommentBlogView(APIView):
         serializer = CommentPutSerializer(instance=post, data=data)
         if serializer.is_valid():
             instance = serializer.save()
-            newSerializer = CommentGetSerializer(instance=instance)
+            newSerializer = CommentGetSerializer(instance=instance, context={'request': request})
             return Response(newSerializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, requset, pk):
+    def delete(self, request, pk):
         post = BlogComment.objects.get(pk=pk)
         post.delete()
-        return Response({"message": "Item was succesfully deleted"})
+        return Response({"message": "Item was successfully deleted"})
+# class CommentBlogView(APIView):
+#     # permission_classes = [IsAuthenticated]
+
+#     def get(self, request, *args, **kwargs):
+
+#         if kwargs:
+#             queryset = BlogComment.objects.filter(
+#                 blog_item__pk=kwargs["blog_item"], parent=None
+#             )
+#             serializer = CommentGetSerializer(queryset, many=True)
+#         else:
+#             queryset = BlogComment.objects.all()
+#             serializer = CommentGetSerializer(queryset, many=True)
+#         return Response(serializer.data)
+
+#     def post(self, request, *args, **kwargs):
+#         serializer = CommentPostSerializer(data=request.data)
+#         user=User.objects.get(pk=int(request.data["user_id"]))
+
+#         if serializer.is_valid():
+#             comment = create_comment(**serializer.data, user=user)
+#             return Response(
+#                 CommentGetSerializer(instance=comment).data,
+#                 status=status.HTTP_201_CREATED,
+#             )
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#     def put(self, request, pk):
+#         post = BlogComment.objects.get(pk=pk)
+#         data = {**request.data, "user": request.user.id}
+#         serializer = CommentPutSerializer(instance=post, data=data)
+#         if serializer.is_valid():
+#             instance = serializer.save()
+#             newSerializer = CommentGetSerializer(instance=instance)
+#             return Response(newSerializer.data, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#     def delete(self, requset, pk):
+#         post = BlogComment.objects.get(pk=pk)
+#         post.delete()
+#         return Response({"message": "Item was succesfully deleted"})
 
 
 # class CommentLikeView(APIView):

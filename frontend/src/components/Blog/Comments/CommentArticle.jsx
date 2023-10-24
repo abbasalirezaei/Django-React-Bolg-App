@@ -3,9 +3,10 @@ import CommentReply from './CommentReply';
 import axios from "axios";
 import useAxios from '../../../utils/useAxios';
 import jwtDecode from "jwt-decode";
+import moment from 'jalali-moment';
 
 export default function CommentArticle(props) {
-    // console.log(props.comment)
+    console.log(props.comment)
 
     const baseurl = "http://127.0.0.1:8000/api/posts/v1";
     const [showReplyForm, setshowReplyForm] = useState(false)
@@ -36,6 +37,8 @@ export default function CommentArticle(props) {
 
     }
 
+
+
     const handleSubmit = (event) => {
         event.preventDefault();
         const form = {
@@ -63,9 +66,17 @@ export default function CommentArticle(props) {
 
         // Reset form fields
     };
-    // setComments(
-    //     [...comments, response.data]
-    // )
+    
+    const createdDate = new Date(props.comment.created_at);
+    const createdDateFormatted = createdDate.toLocaleString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric"
+    });
+    const createdDatePersian = moment(props.comment.created_at).locale('fa').format('YYYY/MM/DD HH:mm:ss');
     return (
         <>
 
@@ -75,11 +86,11 @@ export default function CommentArticle(props) {
                     <div class="flex items-center">
                         <p class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold"><img
                             class="mr-2 w-6 h-6 rounded-full"
-                            src="https://flowbite.com/docs/images/people/profile-picture-2.jpg"
+                            src={props.comment.profile.image}
                             alt="Michael Gough" />{props.comment.username}</p>
                         <p class="text-sm text-gray-600 dark:text-gray-400">
                             <time pubdate dateTime="2022-02-08"
-                                title="February 8th, 2022">Feb. 8, 2022</time></p>
+                                title="February 8th, 2022">{createdDatePersian}</time></p>
                     </div>
 
                     <button id="dropdownComment1Button" data-dropdown-toggle="dropdownComment1"
@@ -182,8 +193,8 @@ export default function CommentArticle(props) {
                 commentChild.length != 0 &&
                 commentChild.map((item, index) => {
                     return <CommentReply comment={item} key={index}
-                        // commentChild={commentChild}
-                        // setCommentChild={setCommentChild}
+                    // commentChild={commentChild}
+                    // setCommentChild={setCommentChild}
                     />
                 })
 
