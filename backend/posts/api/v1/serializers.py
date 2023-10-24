@@ -7,10 +7,30 @@ from posts.models import(
     Category,
     BlogLike,
     BlogComment,
-    CommentLike
+    CommentLike,
+    Author
     )
 
+class AuthorSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username')
+    profile_image = serializers.SerializerMethodField()
 
+    class Meta:
+        model = Author
+        fields = ['user_name', 'profile_image']
+
+    def get_profile_image(self, obj):
+        request = self.context.get('request')
+        if obj.user.profile.image:
+            return request.build_absolute_uri(obj.user.profile.image.url)
+        return None
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        return {
+            'user_name': representation['user_name'],
+            'profile_image': representation['profile_image'],
+        }
 class LikeGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogLike
@@ -26,7 +46,7 @@ class LikeSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     # product_ratings=serializers.StringRelatedField(many=True,read_only=True)
     # product_imaags=ProductImagesSerializer(many=True,read_only=True)
-    author = serializers.StringRelatedField(source='author.user.username')
+    author = AuthorSerializer()
     class Meta:
         model=Post
         fields =[

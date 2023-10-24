@@ -6,7 +6,6 @@ import jwtDecode from "jwt-decode";
 import moment from 'jalali-moment';
 
 export default function CommentArticle(props) {
-    console.log(props.comment)
 
     const baseurl = "http://127.0.0.1:8000/api/posts/v1";
     const [showReplyForm, setshowReplyForm] = useState(false)
