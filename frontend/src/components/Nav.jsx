@@ -5,14 +5,28 @@ import jwt_decode from "jwt-decode"
 import AuthContext from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 export default function Nav() {
+    const baseurl = "http://127.0.0.1:8000/api/v1";
     const { user, logoutUser } = useContext(AuthContext)
     const token = localStorage.getItem("authTokens")
-
+    const [searchText, setSearchText] = useState("");
     if (token) {
         const decoded = jwt_decode(token)
         var user_id = decoded.user_id
     }
+    // useEffect(() => {
+    //     fetchData(baseurl + `/blogs?title=${searchText}`);
 
+    // }, []);
+
+    // function fetchData(url) {
+    //     fetch(url)
+    //         .then((response) => response.json())
+    //         .then((data) => {
+
+    //             setBlogs(data)
+    //             setTotalResult(data.count)
+    //         });
+    // }
 
     return (
         <nav className="flex items-center justify-between flex-wrap bg-gray-500 p-4 pl-16">
@@ -38,16 +52,39 @@ export default function Nav() {
                     </Link>
 
                 </div>
+                <div className='max-w-md mx-auto text-sm h-10'>
+                    <div className="relative flex items-center w-full h-12 rounded-lg focus-within:shadow-lg bg-white overflow-hidden" >
+
+                        <input
+                            className="peer h-full w-full outline-none text-sm text-gray-700 pr-2 pl-2"
+                            type="text"
+                            id="search"
+                            value={searchText}
+                            onChange={(event) => setSearchText(event.target.value)}
+                            placeholder="Search something.." />
+                        <div className="grid place-items-center h-full w-12 text-gray-500 text-sm">
+                            <button>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
                 <div>
 
 
                     {token === null &&
                         <>
-                            <Link to="/login" className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-white">
-                                Sign In
+                            <Link to="/login" className="block mt-4 ml-4 lg:inline-block lg:mt-0 text-white hover:text-white">
+                                Login
                             </Link>
-                            <Link to="/register" className="pl-3  pr-16 block mt-4 lg:inline-block lg:mt-0 text-white hover:text-white">
-                                Sign Up
+                            <Link to="/register" className="pl-3  pr-1 block mt-4 lg:inline-block lg:mt-0 text-white hover:text-white">
+                                Register
+                            </Link>
+                            <Link to="/author/register" className="pl-2  pr-16 block mt-4 lg:inline-block lg:mt-0 text-white hover:text-white">
+                                Author Register
                             </Link>
 
                         </>

@@ -72,24 +72,24 @@ export default function Comment(props) {
     }
     return (
         <div>
-            <section class="bg-gray-200 dark:bg-gray-200 rounded-sm py-8 lg:py-16 antialiased">
-                <div class="max-w-2xl mx-auto px-4">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-lg lg:text-2xl font-bold text-gray-900 dark:text-dark">Discussion ({comments.length + sum })</h2>
+            <section className="bg-gray-200 dark:bg-gray-200 rounded-sm py-8 lg:py-16 antialiased">
+                <div className="max-w-2xl mx-auto px-4">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-dark">Discussion ({comments.length + sum })</h2>
                     </div>
 
-                    <form class="mb-6" onSubmit={handleSubmit}>
-                        <div class="py-2 px-4 mb-4 bg-white rounded-lg rounded-t-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                            <label for="comment" class="sr-only">Your comment</label>
+                    <form className="mb-6" onSubmit={handleSubmit}>
+                        <div className="py-2 px-4 mb-4 bg-white rounded-lg rounded-t-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                            <label for="comment" className="sr-only">Your comment</label>
                             <textarea id="comment" rows="6"
-                                class="px-0 w-full text-sm text-gray-300 border-0 focus:ring-0 focus:outline-none dark:text-white dark:placeholder-gray-400 dark:bg-gray-800"
+                                className="px-0 w-full text-sm text-gray-300 border-0 focus:ring-0 focus:outline-none dark:text-white dark:placeholder-gray-400 dark:bg-gray-800"
                                 placeholder="Write a comment..." required
                                 onChange={(e) => setcommentText(e.target.value)}
                                 value={commentText}
                             ></textarea>
                         </div>
                         <button type="submit"
-                            class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-red-400 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-gray-500">
+                            className="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-red-400 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-gray-500">
                             Post comment
                         </button>
                     </form>

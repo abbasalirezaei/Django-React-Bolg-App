@@ -1,4 +1,37 @@
-from rest_framework import generics, pagination,viewsets
+from posts.models import (
+    Post,
+    Category,
+    BlogLike,
+    BlogComment,
+    CommentLike,
+    Author
+
+)
+from .serializers import (
+    PostSerializer,
+    CategorySerializer,
+    LikeGetSerializer,
+    LikeSerializer,
+    BlogComment,
+    CommentGetSerializer,
+    CommentPostSerializer,
+    CommentPutSerializer,
+    AuthorSerializer
+
+
+)
+from django.db.models import Count
+from .services.comment_view import create_comment
+from .services.like_view import press_like_to_product
+from rest_framework.views import APIView
+from django.views.decorators.http import require_GET
+from django.db.models import Q
+from ipware import get_client_ip
+from django.db import IntegrityError
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from rest_framework import generics, pagination, viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from django.views.decorators.csrf import csrf_exempt
@@ -7,62 +40,41 @@ from django.http import JsonResponse
 
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
-from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework.response import Response
-from django.db import IntegrityError
-from ipware import get_client_ip
 
+class AuthorPostsAPIView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
 
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
+    def get_queryset(self):
+        user_id = self.request.user
+        author=Author.objects.get(user=user_id)
+        return Post.objects.filter(author=author)
 
-from .services.like_view import press_like_to_product
-from .services.comment_view import create_comment
-
-from django.db.models import Count
-from .serializers import (
-   PostSerializer,
-   CategorySerializer,
-   LikeGetSerializer,
-   LikeSerializer,
-   BlogComment,
-   CommentGetSerializer,
-   CommentPostSerializer,
-   CommentPutSerializer
-
-   
-)
-
-from posts.models import (
-    Post,
-    Category,
-    BlogLike,
-    BlogComment,
-    CommentLike
-
-)
 
 class PostList(generics.ListCreateAPIView):
     # queryset=Post.objects.all()
-    serializer_class=PostSerializer
+    serializer_class = PostSerializer
+
     def get_queryset(self):
         category = self.request.query_params.get('category', None)
+        title = self.request.query_params.get('title', None)
         if category:
             queryset = Post.objects.filter(categories=category)
+        elif title:
+            queryset = Post.objects.filter(title__icontains=title)
         else:
             queryset = Post.objects.all()
         return queryset
+
+
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset=Post.objects.all()
+    queryset = Post.objects.all()
     # permission_classes=[IsAuthenticated]
-    serializer_class=PostSerializer
+    serializer_class = PostSerializer
     lookup_field = 'pk'
-    
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.increase_views()
@@ -72,36 +84,41 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
         # Get the user's IP address
         # ip_address, _ = get_client_ip(request)
 
-
         # if ip_address:  # If IP is detected
         #     instance.increment_views(ip_address)  # Call the increment_views method
 
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
+
 class CategoryList(generics.ListCreateAPIView):
-    queryset=Category.objects.all()
+    queryset = Category.objects.all()
     # permission_classes=[IsAuthenticated]
-    serializer_class=CategorySerializer
+    serializer_class = CategorySerializer
 
 
 # popular post
 
 class MostViewedPostsAPIView(generics.ListAPIView):
-    queryset = Post.objects.filter(status=True).order_by('-views')[:8]  # Query for popular posts
+    queryset = Post.objects.filter(status=True).order_by(
+        '-views')[:8]  # Query for popular posts
     serializer_class = PostSerializer
+
 
 class MostLikedPostsAPIView(generics.ListAPIView):
-    queryset = Post.objects.filter(status=True).annotate(like_count=Count('bloglike')).order_by('-like_count')[:8]
+    queryset = Post.objects.filter(status=True).annotate(
+        like_count=Count('bloglike')).order_by('-like_count')[:8]
     serializer_class = PostSerializer
-# Blog tags list  
+# Blog tags list
+
+
 class TagBlogList(generics.ListCreateAPIView):
-    serializer_class=PostSerializer
+    serializer_class = PostSerializer
+
     def get_queryset(self):
-        tag=self.kwargs['tag']
+        tag = self.kwargs['tag']
         queryset = Post.objects.filter(tags__icontains=tag)
         return queryset
-
 
 
 class LikeView(APIView):
@@ -109,7 +126,8 @@ class LikeView(APIView):
 
     def get(self, request, *args, **kwargs):
         if kwargs:
-            queryset = BlogLike.objects.filter(blog_item__pk=kwargs["blog_item_pk"])
+            queryset = BlogLike.objects.filter(
+                blog_item__pk=kwargs["blog_item_pk"])
             serializer = LikeGetSerializer(queryset, many=True)
         else:
             queryset = BlogLike.objects.all()
@@ -118,23 +136,39 @@ class LikeView(APIView):
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
-        
-      
-        user=User.objects.get(pk=int(request.data["user_id"]))
-        post=Post.objects.get(pk=int(request.data["blog_item"]))
+
+        user = User.objects.get(pk=int(request.data["user_id"]))
+        post = Post.objects.get(pk=int(request.data["blog_item"]))
         like = BlogLike.objects.filter(user=user, blog_item=post)
         if like:
-            like.like_status="false"
+            like.like_status = "false"
             like.delete()
-            msg=False
+            msg = False
         else:
-            BlogLike.objects.create(user=user ,blog_item=post,like_status=True)  
-            msg=True
-        return Response({"msg":msg})
- 
+            BlogLike.objects.create(
+                user=user, blog_item=post, like_status=True)
+            msg = True
+        return Response({"msg": msg})
 
+
+@csrf_exempt
+@require_GET
+def search_blogs(request):
+    search_query = request.GET.get('q', '')
+
+    # Perform the search query on the Blog model
+    search_results = Post.objects.filter(
+        Q(title__icontains=search_query) | Q(body__icontains=search_query)
+    )
+
+    # Serialize the search results
+    serialized_results = [{'title': blog.title, 'body': blog.body}
+                          for blog in search_results]
+
+    return JsonResponse(serialized_results, safe=False)
 
 #  =========== comments views
+
 
 class CommentBlogView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -145,10 +179,12 @@ class CommentBlogView(APIView):
             queryset = BlogComment.objects.filter(
                 blog_item__pk=kwargs["blog_item"], parent=None
             )
-            serializer = CommentGetSerializer(queryset, many=True, context={'request': request})
+            serializer = CommentGetSerializer(
+                queryset, many=True, context={'request': request})
         else:
             queryset = BlogComment.objects.all()
-            serializer = CommentGetSerializer(queryset, many=True, context={'request': request})
+            serializer = CommentGetSerializer(
+                queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
@@ -158,7 +194,8 @@ class CommentBlogView(APIView):
         if serializer.is_valid():
             comment = create_comment(**serializer.data, user=user)
             return Response(
-                CommentGetSerializer(instance=comment, context={'request': request}).data,
+                CommentGetSerializer(instance=comment, context={
+                                     'request': request}).data,
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -169,7 +206,8 @@ class CommentBlogView(APIView):
         serializer = CommentPutSerializer(instance=post, data=data)
         if serializer.is_valid():
             instance = serializer.save()
-            newSerializer = CommentGetSerializer(instance=instance, context={'request': request})
+            newSerializer = CommentGetSerializer(
+                instance=instance, context={'request': request})
             return Response(newSerializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

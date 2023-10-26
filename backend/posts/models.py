@@ -7,14 +7,6 @@ from datetime import datetime
 
 
 
-
-class Author(models.Model):
-    user=models.ForeignKey(User,on_delete=models.CASCADE)
-    
-    def __str__(self):
-        return self.user.username
-
-
 class Category(models.Model):
     name = models.CharField(_("Category name"), max_length=100)
     body = models.TextField(_("cat body"),blank=True,null=True)
@@ -25,6 +17,11 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+class Author(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.user.username
 
 
 class Post(models.Model):

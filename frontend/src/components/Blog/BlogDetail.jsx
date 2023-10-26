@@ -147,6 +147,10 @@ export default function BlogDetail() {
 
 	// const authorName = blog.author.user.username;
 	const createdDatePersian = moment(blog.created_at).locale('fa').format('YYYY/MM/DD HH:mm:ss');
+	
+	if(blog.status ==false){
+		window.location.href="/"
+	}
 	return (
 		<>
 			<main className="mt-10">

@@ -13,7 +13,8 @@ from api.models import User,Profile
 from .serializers import (
 	UserSerializer,
 	MyTokenObtainPairSerializer,
-	RegisterSerializer
+	RegisterSerializer,
+      RegisterAuthorSerializer
 	)
 
 
@@ -38,6 +39,15 @@ class RegisterView(generics.CreateAPIView):
 	queryset=User.objects.all()
 	permission_classes=[AllowAny]
 	serializer_class=RegisterSerializer
+
+class RegisterAuthorView(generics.CreateAPIView):
+	queryset=User.objects.all()
+	permission_classes=[AllowAny]
+	serializer_class=RegisterAuthorSerializer
+
+
+
+
 
 
 @api_view(['GET', 'POST'])

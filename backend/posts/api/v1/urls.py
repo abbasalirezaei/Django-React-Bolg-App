@@ -28,7 +28,16 @@ urlpatterns = [
     path("<blog_item>/comments/", views.CommentBlogView.as_view(), name="get_blog_comments"),
     path("comments/", views.CommentBlogView.as_view(), name="get_all_comments"),
     path("comment/create/", views.CommentBlogView.as_view(), name="create_blog_comment"),
+
+
+    
     # path("comment/<pk>/update/", CommentBlogView.as_view(), name="update_comment"),
     # path("comment/<pk>/delete/", CommentBlogView.as_view(), name="delete_comment"),
     
+    # 
+    path('search/', views.search_blogs, name='search_blogs'),
+
+
+    # author list 
+    path('authors-blogs/', views.AuthorPostsAPIView.as_view()),
 ]

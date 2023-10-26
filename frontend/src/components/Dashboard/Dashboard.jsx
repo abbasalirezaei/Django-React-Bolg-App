@@ -1,6 +1,7 @@
-import {useState, useEffect} from 'react'
+import { useState, useEffect } from 'react'
 import jwtDecode from 'jwt-decode'
 import useAxios from '../../utils/useAxios';
+import { Link } from 'react-router-dom/cjs/react-router-dom';
 export default function Dashboard() {
     const [sidenav, setSidenav] = useState(true);
 
@@ -8,52 +9,53 @@ export default function Dashboard() {
         setSidenav(!sidenav);
     };
 
-    
+
     const [res, setRes] = useState("")
     const api = useAxios();
     const token = localStorage.getItem("authTokens")
 
-    if (token){
-      const decode = jwtDecode(token)
-      var user_id = decode.user_id
-      var username = decode.username
-      var full_name = decode.full_name
-      var image = decode.image
+    if (token) {
+        const decode = jwtDecode(token)
+        var user_id = decode.user_id
+        var username = decode.username
+        var full_name = decode.full_name
+        var image = decode.image
+        var is_author = decode.is_author
 
     }
-   
+
     useEffect(() => {
-      const fetchData = async () => {
-        try{
-          const response = await api.get("/test/")
-          setRes(response.data.response_data)
-        } catch (error) {
-          console.log(error);
-          setRes("Something went wrong")
+        const fetchData = async () => {
+            try {
+                const response = await api.get("/test/")
+                setRes(response.data.response_data)
+            } catch (error) {
+                console.log(error);
+                setRes("Something went wrong")
+            }
         }
-      }
-      fetchData()
+        fetchData()
     }, [])
 
-    
+
     useEffect(() => {
-      const fetchPostData = async () => {
-        try{
-          const response = await api.post("/test/")
-          setRes(response.data.response_data)
-        } catch (error) {
-          console.log(error);
-          setRes("Something went wrong")
+        const fetchPostData = async () => {
+            try {
+                const response = await api.post("/test/")
+                setRes(response.data.response_data)
+            } catch (error) {
+                console.log(error);
+                setRes("Something went wrong")
+            }
         }
-      }
-      fetchPostData()
+        fetchPostData()
     }, [])
 
 
     // const userUsername = localStorage.getItem('user_username');
     return (
         <body className="font-poppins antialiased">
-            <div id="view" className="h-full w-screen flex flex-row" data-sidenav={sidenav}>
+            <div id="view" className="" data-sidenav={sidenav}>
                 <button
                     onClick={toggleSidenav}
                     className="p-2 border-2 bg-white rounded-md border-gray-200 shadow-lg text-gray-500 focus:bg-teal-500 focus:outline-none focus:text-white absolute top-0 left-0 sm:hidden"
@@ -78,24 +80,29 @@ export default function Dashboard() {
                     onClick={() => setSidenav(false)}
                 >
                     <div className="space-y-4 md:space-y-10 mt-10">
-                       
+
                         <div id="profile" className="space-y-3">
                             <img
                                 src="https://images.unsplash.com/photo-1628157588553-5eeea00af15c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80"
-                                
+
                                 alt="Avatar user"
                                 className="w-10 md:w-16 rounded-full mx-auto"
                             />
                             <div>
                                 <h2 className="font-medium text-xs md:text-sm text-center text-teal-500">
-                                {username}
+                                    {username}
                                 </h2>
-                                <p className="text-xs text-gray-500 text-center">Administrator</p>
+                                <p className="text-xs text-gray-500 text-center">
+                                    {
+                                        is_author ? "Author" : "None" 
+                                    }
+                                </p>
+                                
                             </div>
                         </div>
-                       
-                       <div className="flex border-2 border-gray-200 rounded-md focus-within:ring-2 ring-teal-500">
-                            
+
+                        <div className="flex border-2 border-gray-200 rounded-md focus-within:ring-2 ring-teal-500">
+
                             <input
                                 type="text"
                                 className="w-full rounded-tl-md rounded-bl-md px-2 py-3 text-sm text-gray-600 focus:outline-none"
@@ -119,8 +126,8 @@ export default function Dashboard() {
                         </div>
 
                         <div id="menu" className="flex flex-col space-y-2">
-                            <a
-                                href=""
+                            <Link
+                                to="/dashboard"
                                 className="text-sm font-medium text-gray-700 py-2 px-2 hover:bg-teal-500 hover:text-white hover:text-base rounded-md transition duration-150 ease-in-out"
                             >
                                 <svg
@@ -134,7 +141,27 @@ export default function Dashboard() {
                                     ></path>
                                 </svg>
                                 <span className="">Dashboard</span>
-                            </a>
+                            </Link>
+                            <Link
+                                to="/dashboard/author/blog"
+                                className="text-sm font-medium text-gray-700 py-2 px-2 hover:bg-teal-500 hover:text-white hover:text-base rounded-md transition duration-150 ease-in-out"
+                            >
+                                <svg
+                                    className="w-6 h-6 fill-current inline-block"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                                        clipRule="evenodd"
+                                    ></path>
+                                </svg>
+                                <span className="">Blogs</span>
+                            </Link>
+
+                            {/*  */}
                             <a
                                 href=""
                                 className="text-sm font-medium text-gray-700 py-2 px-2 hover:bg-teal-500 hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
@@ -151,6 +178,7 @@ export default function Dashboard() {
                                 </svg>
                                 <span className="">Products</span>
                             </a>
+
                             <a
                                 href=""
                                 className="text-sm font-medium text-gray-700 py-2 px-2 hover-bg-teal-500 hover-text-white hover-scale-105 rounded-md transition duration-150 ease-in-out"
@@ -207,24 +235,7 @@ export default function Dashboard() {
                                 </svg>
                                 <span className="">Calendar</span>
                             </a>
-                            <a
-                                href=""
-                                className="text-sm font-medium text-gray-700 py-2 px-2 hover-bg-teal-500 hover-text-white hover-scale-105 rounded-md transition duration-150 ease-in-out"
-                            >
-                                <svg
-                                    className="w-6 h-6 fill-current inline-block"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        fillRule="evenodd"
-                                        d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                                        clipRule="evenodd"
-                                    ></path>
-                                </svg>
-                                <span className="">Table</span>
-                            </a>
+
                             <a
                                 href=""
                                 className="text-sm font-medium text-gray-700 py-2 px-2 hover-bg-teal-500 hover-text-white hover-scale-105 rounded-md transition duration-150 ease-in-out"

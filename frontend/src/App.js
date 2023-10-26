@@ -21,7 +21,10 @@ import BlogTag from './components/Blog/BlogTag'
 // Accounts
 import SignIn from './components/Accounts/SignIn'
 import SignUp from './components/Accounts/SignUp'
-import Dashboard from './components/Accounts/Dashboard'
+// import Dashboard from './components/Accounts/Dashboard'
+import AuthorSignUp from './components/Accounts/AuthorSignUp'
+import Dashboard from './components/Dashboard/Dashboard'
+import AuthorBlogs from './components/Dashboard/AuthorBlogs'
 
 
 function App() {
@@ -31,8 +34,12 @@ function App() {
         < Nav/>
         <Switch>
           <PrivateRoute component={Dashboard} path="/dashboard" exact />
+          <PrivateRoute component={AuthorBlogs} path="/dashboard/author/blog" exact />
+
+
           <Route component={SignIn} path="/login" />
           <Route component={SignUp} path="/register" exact />
+          <Route component={AuthorSignUp} path="/author/register" exact />
 
 
           <Route component={BlogList} path="/bloglist" exact />
