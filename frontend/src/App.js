@@ -25,6 +25,7 @@ import SignUp from './components/Accounts/SignUp'
 import AuthorSignUp from './components/Accounts/AuthorSignUp'
 import Dashboard from './components/Dashboard/Dashboard'
 import AuthorBlogs from './components/Dashboard/AuthorBlogs'
+import AuthorCreateBlogs from './components/Dashboard/AuthorCreateBlogs'
 
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
         <Switch>
           <PrivateRoute component={Dashboard} path="/dashboard" exact />
           <PrivateRoute component={AuthorBlogs} path="/dashboard/author/blog" exact />
+          <PrivateRoute component={AuthorCreateBlogs} path="/dashboard/author/blog/create" exact />
 
 
           <Route component={SignIn} path="/login" />

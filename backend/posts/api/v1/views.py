@@ -16,7 +16,8 @@ from .serializers import (
     CommentGetSerializer,
     CommentPostSerializer,
     CommentPutSerializer,
-    AuthorSerializer
+    AuthorSerializer,
+    PostCreateSerializer
 
 
 )
@@ -51,6 +52,23 @@ class AuthorPostsAPIView(generics.ListAPIView):
         user_id = self.request.user
         author=Author.objects.get(user=user_id)
         return Post.objects.filter(author=author)
+
+class AuthorPostsCreateUpdateDeleteAPIView(generics.ListCreateAPIView):
+    serializer_class = PostCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user_id = self.request.user
+        author = Author.objects.get(user=user_id)
+        return Post.objects.filter(author=author)
+
+    def perform_create(self, serializer):
+        user_id = self.request.user
+        author = Author.objects.get(user=user_id)
+        # serializer.save(author=author)
+        post = serializer.save(author=author)
+        categories = self.request.data.get('categories', [])
+        post.categories.set(categories)
 
 
 class PostList(generics.ListCreateAPIView):
@@ -93,7 +111,6 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all()
-    # permission_classes=[IsAuthenticated]
     serializer_class = CategorySerializer
 
 

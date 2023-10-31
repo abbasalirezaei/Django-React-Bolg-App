@@ -2,14 +2,15 @@ from rest_framework import serializers
 from .services.comment_view import get_user_by_id
 from api.models import Profile
 from api.serializers import ProfileSerializer
-from posts.models import( 
+from posts.models import (
     Post,
     Category,
     BlogLike,
     BlogComment,
     CommentLike,
     Author
-    )
+)
+
 
 class AuthorSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.username')
@@ -31,6 +32,8 @@ class AuthorSerializer(serializers.ModelSerializer):
             'user_name': representation['user_name'],
             'profile_image': representation['profile_image'],
         }
+
+
 class LikeGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogLike
@@ -43,33 +46,70 @@ class LikeSerializer(serializers.ModelSerializer):
         fields = ("blog_item",)
 
 
+# class PostSerializer(serializers.ModelSerializer):
+#     # product_ratings=serializers.StringRelatedField(many=True,read_only=True)
+#     # product_imaags=ProductImagesSerializer(many=True,read_only=True)
+#     author = AuthorSerializer()
+
+#     class Meta:
+#         model = Post
+#         fields = [
+#             'id', 'title', 'slug', 'author', 'body', 'categories', 'status', 'created_at', 'updated_at', 'img',
+#             'get_tag_list', 'views'
+#         ]
+#         read_only_fields=['author']
+
+
+#     def __init__(self, *args, **kwargs):
+#         super(PostSerializer, self).__init__(*args, **kwargs)
+#         self.Meta.depth = 1
+
 class PostSerializer(serializers.ModelSerializer):
-    # product_ratings=serializers.StringRelatedField(many=True,read_only=True)
-    # product_imaags=ProductImagesSerializer(many=True,read_only=True)
-    author = AuthorSerializer()
+    # author = AuthorSerializer()   
     class Meta:
-        model=Post
-        fields =[
-            'id','title','slug','author','body','categories','status','created_at','updated_at','img',
-            'get_tag_list','views'
-                    ]
-        
-    def __init__(self, *args, **kwargs):
-        super(PostSerializer, self).__init__(*args, **kwargs)
-        self.Meta.depth=1
+        model = Post
+        fields = [
+            'id', 'title', 'slug', 'author', 'body', 'categories', 'status', 'created_at', 'updated_at', 'img',
+            'get_tag_list', 'views'
+        ]
+        read_only_fields = ['author']
+
+    def create(self, validated_data):
+        user_id = self.context['request'].user
+        author=Author.objects.get(user=user_id)
+        validated_data['author'] = author
+        post = Post.objects.create(**validated_data)
+        return post
+
+class PostCreateSerializer(serializers.ModelSerializer):
+    # author = AuthorSerializer()   
+    class Meta:
+        model = Post
+        fields = [
+            'id', 'title', 'slug', 'author', 'body',  'status', 'created_at', 'updated_at', 'img',
+            'get_tag_list', 'views'
+        ]
+        read_only_fields = ['author']
+
+    def create(self, validated_data):
+        user_id = self.context['request'].user
+        author=Author.objects.get(user=user_id)
+        validated_data['author'] = author
+        post = Post.objects.create(**validated_data)
+        return post
+
+
 class CategorySerializer(serializers.ModelSerializer):
- 
+
     class Meta:
-        model=Category
-        fields =[
-            'id','name', 'body','img'
-                    ]
-        
+        model = Category
+        fields = [
+            'id', 'name', 'body', 'img'
+        ]
+
     def __init__(self, *args, **kwargs):
         super(CategorySerializer, self).__init__(*args, **kwargs)
-        self.Meta.depth=1
-
-
+        self.Meta.depth = 1
 
 
 class CommentPostSerializer(serializers.ModelSerializer):
@@ -87,11 +127,13 @@ class CommentPutSerializer(serializers.ModelSerializer):
 class CommentGetSerializer(serializers.ModelSerializer):
 
     username = serializers.SerializerMethodField("get_username")
-    children_comments = serializers.SerializerMethodField("get_children_comments")
+    children_comments = serializers.SerializerMethodField(
+        "get_children_comments")
     profile = serializers.SerializerMethodField("get_profile")
+
     def get_username(self, foo):
         return foo.user.username
-    
+
     def get_profile(self, foo):
         profile = foo.user.profile
         request = self.context.get('request')
@@ -106,7 +148,7 @@ class CommentGetSerializer(serializers.ModelSerializer):
             "image": image_url,
             "verified": profile.verified,
         }
-        
+
     def get_children_comments(self, foo):
         request = self.context.get('request')
         return [
