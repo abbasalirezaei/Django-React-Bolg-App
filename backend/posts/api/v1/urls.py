@@ -40,8 +40,8 @@ urlpatterns = [
 
     # author list 
     path('authors-blogs/', views.AuthorPostsAPIView.as_view()),
-    path('author/posts/', views.AuthorPostsCreateUpdateDeleteAPIView.as_view(), name='author-posts'),
-
+    path('author/posts/', views.AuthorPostsListCreateAPIView.as_view(), name='author-posts'),
+    path('author/post/<int:pk>/', views.PostUpdateDeleteView.as_view(), name='post-update-delete'),
     # path('categories/', views.CategoryList.as_view(), name='category-list'),
 
 ]

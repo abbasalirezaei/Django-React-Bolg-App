@@ -26,6 +26,7 @@ import AuthorSignUp from './components/Accounts/AuthorSignUp'
 import Dashboard from './components/Dashboard/Dashboard'
 import AuthorBlogs from './components/Dashboard/AuthorBlogs'
 import AuthorCreateBlogs from './components/Dashboard/AuthorCreateBlogs'
+import AuthorEditBlogs from './components/Dashboard/AuthorEditBlogs'
 
 
 function App() {
@@ -37,6 +38,8 @@ function App() {
           <PrivateRoute component={Dashboard} path="/dashboard" exact />
           <PrivateRoute component={AuthorBlogs} path="/dashboard/author/blog" exact />
           <PrivateRoute component={AuthorCreateBlogs} path="/dashboard/author/blog/create" exact />
+          <PrivateRoute component={AuthorEditBlogs} path="/dashboard/author/edit-blog/:postId" exact />
+          {/* <Route path="/edit-blog/:postId" component={EditBlog} /> */}
 
 
           <Route component={SignIn} path="/login" />

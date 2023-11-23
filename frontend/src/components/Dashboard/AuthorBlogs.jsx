@@ -43,15 +43,41 @@ export default function AuthorBlogs() {
             });
     }
 
+    const handleDelete = async (postId) => {
+        try {
+            // Send a DELETE request to the API to delete the task
+            await api.delete(baseurl + `/author/post/${postId}`);
+
+            // Filter out the task with the given postId
+            const updatedPost = blogs.filter((item) => item.id !== postId);
+
+            setBlogs(updatedPost);
+        } catch (error) {
+            // Handle the error, e.g., log it or show a user-friendly message
+            console.error('An error occurred while deleting the task:', error);
+        }
+    };
+
+
     // const createdDatePersian = moment(blog.created_at).locale('fa').format('YYYY/MM/DD HH:mm:ss');
     return (
-        <div className='grid grid-cols-3 bg-gray-300'>
+        <div className='grid grid-cols-3 bg-gray-300 '>
 
-            <div className='col-span-1'>
+            <div className='col-span-1'
+             style={{
+                width: "250px",
+                position: 'fixed',
+                top: '50px', /* You can adjust the top position to place it where you want */
+                bottom: '0', /* This keeps the sidebar fixed to the bottom of the viewport */
+                maxHeight: 'calc(100% - 50px); ', /* Set a maximum height for the sidebar */
+                overflowY: 'auto'
+            }
+            }
+            >
                 <Dashboard />
             </div>
 
-            <div className='col-span-2 mr-36 mt-20'>
+            <div className='col-span-2 mt-20 ml-96'>
                 <div className="antialiased font-sans bg-gray-200">
                     <div className="container mx-auto px-4 sm:px-8">
                         <div className="py-8">
@@ -80,6 +106,9 @@ export default function AuthorBlogs() {
                                                 <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                                     Status
                                                 </th>
+                                                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Actions
+                                                </th>
                                             </tr>
                                         </thead>
 
@@ -96,7 +125,7 @@ export default function AuthorBlogs() {
                                                                     {
                                                                         item.status == true ?
                                                                             <Link to={`/blog/${item.title}/${item.id}/`}>
-                                                                               { item.title}
+                                                                                {item.title}
                                                                             </Link>
                                                                             :
                                                                             item.title
@@ -142,6 +171,24 @@ export default function AuthorBlogs() {
                                                                             <span className="relative">UnPublished</span>
                                                                         </span>
                                                                 }
+
+                                                            </td>
+                                                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                                                <p className="text-white whitespace-no-wrap inline-block pr-3">
+                                                                    <button className="bg-red-400 rounded-md p-1"
+                                                                        onClick={() => handleDelete(item.id)}
+                                                                        type='submit'
+                                                                    >Delete</button>
+                                                                </p>
+                                                                <p className="text-white whitespace-no-wrap inline-block">
+
+                                                                    <Link
+                                                                        className="bg-blue-500 rounded-md p-1"
+                                                                        to={`/dashboard/author/edit-blog/${item.id}`}
+                                                                    >Edit</Link>
+                                                                </p>
+
+
 
                                                             </td>
                                                         </tr>

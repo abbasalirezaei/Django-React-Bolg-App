@@ -53,7 +53,7 @@ class AuthorPostsAPIView(generics.ListAPIView):
         author=Author.objects.get(user=user_id)
         return Post.objects.filter(author=author)
 
-class AuthorPostsCreateUpdateDeleteAPIView(generics.ListCreateAPIView):
+class AuthorPostsListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = PostCreateSerializer
     permission_classes = [IsAuthenticated]
 
@@ -70,6 +70,10 @@ class AuthorPostsCreateUpdateDeleteAPIView(generics.ListCreateAPIView):
         categories = self.request.data.get('categories', [])
         post.categories.set(categories)
 
+class PostUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated] 
 
 class PostList(generics.ListCreateAPIView):
     # queryset=Post.objects.all()

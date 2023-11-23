@@ -70,7 +70,7 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = [
             'id', 'title', 'slug', 'author', 'body', 'categories', 'status', 'created_at', 'updated_at', 'img',
-            'get_tag_list', 'views'
+            'get_tag_list', 'views' ,"tags"
         ]
         read_only_fields = ['author']
 
