@@ -101,10 +101,7 @@ Django-React-Blog-App/
 
 ## 📸 Screenshots
 
-_Add screenshots of:_
-- Main blog list
-- Post detail page
-- Django Admin Panel
+_I did'nt add yet ...🤞😉
 
 ---
 
