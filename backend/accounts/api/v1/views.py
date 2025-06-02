@@ -60,15 +60,14 @@ class ActivationAPIView(APIView):
         decoded_payload, error_message = self.decode_jwt_token(token)
 
         if decoded_payload:
-            print("decoded_payload:", decoded_payload)
             user_id = decoded_payload["user_id"]
             user_obj = User.objects.get(id=user_id)
-            if user_obj.is_verified:
+            if user_obj.verified:
                 return Response(
                     {"message": "your account already Activate"},
                     status=status.HTTP_200_OK,
                 )
-            user_obj.is_verified = True
+            user_obj.verified = True
             user_obj.save()
             return Response(
                 {"message": "Token is valid", "data": decoded_payload},
@@ -90,22 +89,3 @@ class ActivationAPIView(APIView):
         except jwt.InvalidTokenError:
             return None, "Token is invalid"
 
-
-
-class TestEmail(generics.GenericAPIView):
-
-    def get(self, request, *args, **kwargs):
-        self.email = "freelearn2000@gmail.com"
-        user_obj = get_object_or_404(User, email=self.email)
-        token = self.get_tokens_for_user(user_obj)
-        email_obj = EmailMessage(
-            "email/activation_email.tpl", {"token": token}, settings.EMAIL_HOST_USER, to=[self.email]
-        )
-        EmailThread(email_obj).start()
-
-        return Response({"email": "email sent"})
-
-    def get_tokens_for_user(self, user):
-        refresh = RefreshToken.for_user(user)
-
-        return str(refresh.access_token)
