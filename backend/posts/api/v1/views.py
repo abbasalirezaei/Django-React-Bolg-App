@@ -27,7 +27,7 @@ from .services.like_view import press_like_to_product
 from rest_framework.views import APIView
 from django.views.decorators.http import require_GET
 from django.db.models import Q
-from ipware import get_client_ip
+# from ipware import get_client_ip
 from django.db import IntegrityError
 from rest_framework.response import Response
 from rest_framework import status
