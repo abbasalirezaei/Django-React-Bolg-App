@@ -4,12 +4,17 @@ from .. import views
 
 urlpatterns = [
     # post-list
-    path("",views.PostListAPIView.as_view(),name="post-list"),
+    path("", views.PostListAPIView.as_view(), name="post-list"),
 
     # post-detail
-    path("post/<str:slug>/",views.PostDetailAPIView.as_view(),name="post-detail"),
-    # author  can create post, update 
-
-
+    path("post/<str:slug>/", views.PostDetailAPIView.as_view(), name="post-detail"),
+    # author  can create post, update
+    path("post/<str:slug>/comment/",
+         views.PostCommentCreateAPIView.as_view(), name="create-comment"),
+    path(
+        "post/<slug:slug>/comment/<int:comment_id>/",
+        views.PostCommentDetailAPIView.as_view(),
+        name="comment-detail"
+    )
 
 ]

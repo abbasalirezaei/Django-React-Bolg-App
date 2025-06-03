@@ -1,8 +1,24 @@
 from rest_framework import serializers
 
 from posts.models import (
-    Post, Tag
+    Post, Tag, PostComment
 )
+
+
+class PostCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostComment
+        fields = ['id', 'user', 'content', 'created_at', 'parent']
+        read_only_fields = ['user', 'created_at',]
+
+    def create(self, validated_data):
+        post = self.context.get("post")
+        user = self.context.get("request").user
+        return PostComment.objects.create(
+            post=post,
+            user=user,
+            **validated_data
+        )
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -14,7 +30,9 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
+    comments = PostCommentSerializer(many=True, read_only=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True)
 
     class Meta:
         model = Post
@@ -27,9 +45,10 @@ class PostSerializer(serializers.ModelSerializer):
             "reading_time", "img",
             "status", "is_featured",
             "created_at", "updated_at",
+            "comments"
         ]
         read_only_fields = [
             "slug", "author",
             "reading_time", "updated_at",
-            "created_at"
+            "created_at", 'status'
         ]
