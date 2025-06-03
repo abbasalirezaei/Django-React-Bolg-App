@@ -128,10 +128,12 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = [
-            # 'user',
             "email",
-            "first_name",
-            "last_name",
+            "full_name",
+            "bio",
             "image",
-            "description",
+            "slug",
+            "created_at",
+            "updated_at",
         ]
+        read_only_fields = ["slug", "created_at", "updated_at"]
