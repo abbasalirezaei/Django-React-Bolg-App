@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 
     # third party
     'mail_templated',
-
+    'drf_yasg',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',

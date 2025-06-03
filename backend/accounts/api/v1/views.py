@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 # third part imports
 from mail_templated import EmailMessage
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 
 # decoding
@@ -17,7 +18,7 @@ from rest_framework_simplejwt.settings import api_settings
 
 
 # local imports
-from .serializers import RegistrationSerializer
+from .serializers import RegistrationSerializer ,CustomTokenObtainSerializer
 from ..utils import EmailThread
 User = get_user_model()
 
@@ -88,4 +89,7 @@ class ActivationAPIView(APIView):
             return None, "Token has expired"
         except jwt.InvalidTokenError:
             return None, "Token is invalid"
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainSerializer
 

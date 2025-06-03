@@ -1,5 +1,10 @@
 from django.urls import path
 
+from rest_framework_simplejwt.views import (
+    TokenRefreshView,
+    TokenVerifyView,
+)
+
 from .. import views
 
 urlpatterns = [
@@ -17,11 +22,13 @@ urlpatterns = [
         name="activation-confirm",
     ),
 
-    path("test-email/", views.TestEmail.as_view(), name="test-email"),
+
 
     # login with jwt
 
-
+    path("jwt/token/create/", views.CustomTokenObtainPairView.as_view(), name="jwt-token"),
+    path("jwt/token/refresh/", TokenRefreshView.as_view(), name="jwt-refresh"),
+    path("jwt/token/verify/", TokenVerifyView.as_view(), name="jwt-verify"),
     # change password
 
     # reset password

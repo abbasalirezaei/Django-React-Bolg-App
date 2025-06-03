@@ -5,6 +5,10 @@ from rest_framework import  exceptions, serializers
 # django import
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
+
+
+# third party imports 
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # locals import
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -61,3 +65,16 @@ class RegistrationSerializer(serializers.ModelSerializer):
             user.profile.save()
 
         return user
+
+
+class CustomTokenObtainSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        validate_data = super().validate(attrs)
+
+        if not self.user.is_verified:
+            msg = "Unable to log in with provided credentials."
+            raise serializers.ValidationError(msg)
+        validate_data["user_id"] = self.user.id
+        validate_data["user_email"] = self.user.email
+
+        return validate_data
