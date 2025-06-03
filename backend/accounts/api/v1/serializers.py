@@ -1,4 +1,5 @@
 # rest_framework imports
+from ...models import Profile
 from rest_framework import exceptions, serializers
 
 
@@ -96,3 +97,41 @@ class ActivationResendSerializer(serializers.Serializer):
         # Store the user instance for later access in the view
         self.user_obj = user_obj
         return value
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password1 = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+    def validate(self, attrs):
+        errors = {}
+        new_password1 = attrs.get("new_password1")
+        new_password = attrs.get("new_password")
+        if new_password1 != new_password:
+            errors["new_passwords"] = ["New Passwords do not match."]
+
+        try:
+            validate_password(password=new_password, user=None)
+        except exceptions.ValidationError as e:
+            errors["new_password"] = list(e.messages)
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        return super().validate(attrs)
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    email = serializers.CharField(source="user.email", read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = [
+            # 'user',
+            "email",
+            "first_name",
+            "last_name",
+            "image",
+            "description",
+        ]

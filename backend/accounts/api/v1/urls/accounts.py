@@ -38,10 +38,9 @@ urlpatterns = [
     path("jwt/token/verify/", TokenVerifyView.as_view(), name="jwt-verify"),
 
     # change password
-    # path(
-    #     "changepassword/", views.ChangePasswordAPIView.as_view(), name="change-password"
-    # ),
-    # resend activation
+    path(
+        "changepassword/", views.ChangePasswordAPIView.as_view(), name="change-password"
+    ),
 
 
 
