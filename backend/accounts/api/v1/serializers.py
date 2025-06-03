@@ -1,5 +1,5 @@
 # rest_framework imports
-from rest_framework import  exceptions, serializers
+from rest_framework import exceptions, serializers
 
 
 # django import
@@ -7,7 +7,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 
 
-# third party imports 
+# third party imports
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # locals import
 from django.contrib.auth import get_user_model
@@ -71,10 +71,28 @@ class CustomTokenObtainSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         validate_data = super().validate(attrs)
 
-        if not self.user.is_verified:
-            msg = "Unable to log in with provided credentials."
+        if not self.user.verified:
+            msg = "Unable to log in with provided credentials, first you have to verify your account."
             raise serializers.ValidationError(msg)
         validate_data["user_id"] = self.user.id
         validate_data["user_email"] = self.user.email
 
         return validate_data
+
+
+class ActivationResendSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+    def validate_email(self, value):
+        """
+        Ensure the email exists in the system before resending activation.
+        """
+        user_obj = User.objects.filter(email=value).first()
+
+        if not user_obj:
+            raise serializers.ValidationError(
+                "No account found with this email.")
+
+        # Store the user instance for later access in the view
+        self.user_obj = user_obj
+        return value

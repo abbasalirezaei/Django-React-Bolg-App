@@ -18,7 +18,11 @@ from rest_framework_simplejwt.settings import api_settings
 
 
 # local imports
-from .serializers import RegistrationSerializer ,CustomTokenObtainSerializer
+from .serializers import (
+    RegistrationSerializer,
+    CustomTokenObtainSerializer,
+    ActivationResendSerializer
+)
 from ..utils import EmailThread
 User = get_user_model()
 
@@ -41,7 +45,7 @@ class RegistrationApiView(generics.GenericAPIView):
                 settings.EMAIL_HOST_USER,
                 to=[email],
             )
-            
+
             EmailThread(email_obj).start()
             print(email_obj)
             return Response(data, status=status.HTTP_201_CREATED)
@@ -52,7 +56,6 @@ class RegistrationApiView(generics.GenericAPIView):
         refresh = RefreshToken.for_user(user)
 
         return str(refresh.access_token)
-
 
 
 class ActivationAPIView(APIView):
@@ -90,6 +93,42 @@ class ActivationAPIView(APIView):
         except jwt.InvalidTokenError:
             return None, "Token is invalid"
 
+
+class ActivationResendAPIView(generics.GenericAPIView):
+    serializer_class = ActivationResendSerializer
+
+    def post(self, request,  *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        user_obj = serializer.user_obj
+        if user_obj.verified:
+            return Response(
+                {"message": "Your account is already activated"},
+                status=status.HTTP_200_OK,
+            )
+
+        # Generate a new activation token
+        token = self.get_tokens_for_user(user_obj)
+
+        # Send activation email
+        email_obj = EmailMessage(
+            "email/activation_email.tpl",
+            {"token": token},
+            settings.EMAIL_HOST_USER,
+            to=[email],
+        )
+        EmailThread(email_obj).start()
+
+        return Response(
+            {"message": "Activation email has been resent..."}, status=status.HTTP_200_OK
+        )
+
+    def get_tokens_for_user(self, user):
+        refresh = RefreshToken.for_user(user)
+        return str(refresh.access_token)
+
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainSerializer
-

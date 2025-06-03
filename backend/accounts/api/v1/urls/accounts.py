@@ -22,15 +22,27 @@ urlpatterns = [
         name="activation-confirm",
     ),
 
+    # reset password
 
+    path(
+        "activation/resend/",
+        views.ActivationResendAPIView.as_view(),
+        name="activation-resend",
+    ),
 
     # login with jwt
 
-    path("jwt/token/create/", views.CustomTokenObtainPairView.as_view(), name="jwt-token"),
+    path("jwt/token/create/",
+         views.CustomTokenObtainPairView.as_view(), name="jwt-token"),
     path("jwt/token/refresh/", TokenRefreshView.as_view(), name="jwt-refresh"),
     path("jwt/token/verify/", TokenVerifyView.as_view(), name="jwt-verify"),
-    # change password
 
-    # reset password
+    # change password
+    # path(
+    #     "changepassword/", views.ChangePasswordAPIView.as_view(), name="change-password"
+    # ),
+    # resend activation
+
+
 
 ]
