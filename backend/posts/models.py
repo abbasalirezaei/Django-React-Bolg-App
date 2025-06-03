@@ -1,109 +1,173 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.utils.text import slugify
 from django.contrib.auth import get_user_model
-User = get_user_model()
-from datetime import datetime  
-# Create your models here.
 
+User = get_user_model()
 
 
 class Category(models.Model):
     name = models.CharField(_("Category name"), max_length=100)
-    body = models.TextField(_("cat body"),blank=True,null=True)
-    img=models.ImageField(upload_to="category_image/",blank=True,null=True)
+    body = models.TextField(_("Category body"), blank=True, null=True)
+    img = models.ImageField(upload_to="category_image/", blank=True, null=True)
+
     class Meta:
         verbose_name = _("Category")
         verbose_name_plural = _("Categories")
 
     def __str__(self):
         return self.name
-class Author(models.Model):
-    user=models.ForeignKey(User,on_delete=models.CASCADE)
-    
-    def __str__(self):
-        return self.user.username
 
+
+class Tag(models.Model):
+    name = models.CharField(_("Tag name"), max_length=30, unique=True)
+
+    class Meta:
+        db_table = 'Tags'
+        managed = True
+        verbose_name = _('Tag')
+        verbose_name_plural = _('Tags')
+
+    def __str__(self):
+        return self.name
 
 class Post(models.Model):
     title = models.CharField(_("Post title"), max_length=250)
-    slug = models.SlugField()
+    slug = models.SlugField(_("Slug"), unique=True, blank=True)
     author = models.ForeignKey(
-        Author,
+        User,
         related_name="posts",
         null=True,
         on_delete=models.SET_NULL,
+        verbose_name=_("Author")
     )
-    
-    body = models.TextField(_("Post body"))
-    categories = models.ManyToManyField(Category, related_name="posts_category", blank=True)
-    tags=models.TextField(blank=True,null=True,help_text="sperte wvery tags wih , and tab ")
-   
-    status = models.BooleanField(default=False)
-    img=models.ImageField(upload_to="blog_image/",blank=True,null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    views = models.IntegerField(default=0)
-    viewed_ips = models.TextField(blank=True)
+    categories = models.ManyToManyField(Category, related_name="posts", blank=True, verbose_name=_("Categories"))
+    tags = models.ManyToManyField(Tag, related_name="posts", blank=True, verbose_name=_("Tags"))
+    description = models.TextField(_("Post description"))
+    short_description = models.CharField(_("Short description"), max_length=300, blank=True)
+    reading_time = models.PositiveIntegerField(_("Reading time (minutes)"), default=0)
+    img = models.ImageField(_("Post image"), upload_to="blog_image/", blank=True, null=True)
+    status = models.BooleanField(_("Published status"), default=False)
+    is_featured = models.BooleanField(_("Featured"), default=False)
 
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
 
-    def increment_views(self, ip_address):
-        # بررسی آی‌پی در لیست آی‌پی‌های مشاهده کننده
-        if ip_address not in self.viewed_ips.split(','):
-            self.views += 1
-            self.viewed_ips += f'{ip_address},'
-            self.save()
-
-    def increase_views(self):
-        self.views +=1
-        self.save()
-        
     class Meta:
         ordering = ("-created_at",)
+        verbose_name = _("Post")
+        verbose_name_plural = _("Posts")
 
     def __str__(self):
-        return f"{self.title} by {self.author.user.username}"
-    
-    def get_tag_list(self):
-        tagList=[]
-        if self.tags is not None:
-            tagList=self.tags.strip().split(', ')
-            
-        else:
-            tagList = []
-        
-        return tagList
-    
+        return f"{self.title} by {self.author.email if self.author else 'Unknown'}"
 
-class BlogLike(models.Model):
-    user = models.ForeignKey(User, verbose_name=("user"), on_delete=models.CASCADE)
-    blog_item = models.ForeignKey(Post, on_delete=models.CASCADE)
-    like_status=models.BooleanField(default=False)
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
 
+        if not self.short_description:
+            self.short_description = self.description[:150]
 
-    def __str__(self):
-        return f"BlogLike({self.user}, {self.blog_item})"
+        self.reading_time = max(1, len(self.description.split()) // 200)  # avg 200 wpm
+        super().save(*args, **kwargs)
+
+    def increment_views(self, ip_address):
+        if not self.view_records.filter(ip_address=ip_address).exists():
+            PostView.objects.create(post=self, ip_address=ip_address)
+
+    @property
+    def views(self):
+        return self.view_records.count()
 
 
+class PostView(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="view_records", verbose_name=_("Post"))
+    ip_address = models.GenericIPAddressField(_("IP Address"))
+    created_at = models.DateTimeField(_("Viewed at"), auto_now_add=True)
 
-class BlogComment(models.Model):
-    user = models.ForeignKey(User, verbose_name=("user"), on_delete=models.CASCADE, null=True)
-    blog_item = models.ForeignKey(Post, on_delete=models.CASCADE)
-    blog_body = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True,blank=True,null=True)
-    updated_at = models.DateTimeField(auto_now=True,blank=True,null=True)
-
-    parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True)
+    class Meta:
+        unique_together = ('post', 'ip_address')
+        verbose_name = _("Post view")
+        verbose_name_plural = _("Post views")
 
     def __str__(self):
-        return f"BlogComment({self.user}, {self.blog_item}, {self.blog_body})"
+        return f"{self.ip_address} viewed {self.post.title}"
+
+
+class PostLike(models.Model):
+    user = models.ForeignKey(
+        User,
+        verbose_name=_("User"),
+        on_delete=models.CASCADE
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="likes",
+        verbose_name=_("Post")
+    )
+
+    class Meta:
+        unique_together = ("user", "post")
+        verbose_name = _("Post like")
+        verbose_name_plural = _("Post likes")
+
+    def __str__(self):
+        return f"PostLike({self.user}, {self.post})"
+
+
+class PostComment(models.Model):
+    user = models.ForeignKey(
+        User,
+        verbose_name=_("User"),
+        on_delete=models.CASCADE,
+        null=True
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="comments",
+        verbose_name=_("Post")
+    )
+    parent = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="replies",
+        verbose_name=_("Parent comment")
+    )
+    content = models.TextField(_("Comment content"))
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("Post comment")
+        verbose_name_plural = _("Post comments")
+
+    def __str__(self):
+        return f"Comment by {self.user.email if self.user else 'Anonymous'} on {self.post.title}"
 
     def children(self):
-        return BlogComment.objects.filter(parent=self)
+        return self.replies.all()
 
 
 class CommentLike(models.Model):
-    user = models.ForeignKey(User, verbose_name=("user"), on_delete=models.CASCADE)
-    comment_blog_item = models.ForeignKey(BlogComment, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User,
+        verbose_name=_("User"),
+        on_delete=models.CASCADE
+    )
+    comment_blog_item = models.ForeignKey(
+        PostComment,
+        on_delete=models.CASCADE,
+        verbose_name=_("Comment")
+    )
+
+    class Meta:
+        unique_together = ('user', 'comment_blog_item')
+        verbose_name = _("Comment like")
+        verbose_name_plural = _("Comment likes")
 
     def __str__(self):
         return f"CommentLike({self.user}, {self.comment_blog_item})"
