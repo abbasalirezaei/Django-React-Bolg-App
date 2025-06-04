@@ -56,3 +56,6 @@ class Post(models.Model):
     @property
     def views(self):
         return self.view_records.count()
+    @property
+    def likes_count(self):
+        return self.likes.count()
