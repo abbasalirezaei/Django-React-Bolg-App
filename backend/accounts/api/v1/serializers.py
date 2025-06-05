@@ -124,6 +124,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source="user.email", read_only=True)
+  
 
     class Meta:
         model = Profile
@@ -137,3 +138,4 @@ class ProfileSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["slug", "created_at", "updated_at"]
+

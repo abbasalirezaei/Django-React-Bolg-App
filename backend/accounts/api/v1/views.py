@@ -176,12 +176,10 @@ class ChangePasswordAPIView(generics.GenericAPIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class ProfileAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
     permission_classes = [IsAuthenticated]
+
     def get_object(self):
-        queryset = self.get_queryset()
-        obj = get_object_or_404(queryset, user=self.request.user)
-        return obj
+        return get_object_or_404(self.queryset, user=self.request.user)

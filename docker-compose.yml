@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     environment:
       - DEBUG=True
-    command: python manage.py runserver 0.0.0.0:8000 # بدون پارامتر --noreload
+    command: python manage.py runserver 0.0.0.0:8000 
 
   frontend:
     build:

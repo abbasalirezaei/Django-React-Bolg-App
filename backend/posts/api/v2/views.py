@@ -33,38 +33,19 @@ class PostListAPIView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, status=False)
 
-
-"""
-class PostCommentCreateAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, slug):
-        post = get_object_or_404(Post, slug=slug, status=True)
-        serializer = PostCommentCreateSerializer(data=request.data, context={"request": request, "post": post})
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"detail": "Comment created."}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-"""
-
-
-class PostCommentCreateAPIView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
+class CommentListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = PostCommentSerializer
 
-    def post(self, request, slug):
-        post = get_object_or_404(Post, slug=slug, status=True)
-        serializer = self.get_serializer(
-            data=request.data,
-            # pass post and request to serializer
-            context={'post': post, 'request': request}
-        )
-        if serializer.is_valid():
-            comment = serializer.save()
-            return Response(PostCommentSerializer(comment).data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        post_slug = self.kwargs.get('slug')
+        post = get_object_or_404(Post, slug=post_slug, status=True)
+        return PostComment.objects.filter(post=post).order_by('-created_at')
 
-class PostCommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    def perform_create(self, serializer):
+        post = get_object_or_404(Post, slug=self.kwargs['slug'], status=True)
+        serializer.save(post=post, user=self.request.user)
+        
+class CommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PostCommentSerializer
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
