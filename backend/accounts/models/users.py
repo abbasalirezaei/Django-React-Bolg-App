@@ -34,7 +34,7 @@ class User(AbstractUser):
         ('author', 'Author'),
         ('reader', 'Reader'),
     )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES,default='reader')
     username = None  # Remove default username
     email = models.EmailField(unique=True)
 

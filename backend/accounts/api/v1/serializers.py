@@ -56,11 +56,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
         full_name = validated_data.pop("full_name", "")
 
         # Create the user instance
-        user = User(email=validated_data["email"])
-        user.set_password(validated_data["password"])
-        user.is_active=False
-        user.verified=False
-        user.save()
+        user = User.objects.create_user(
+            email=validated_data["email"],
+            password=validated_data["password"],
+            role="reader",
+            verified=False,
+            is_active=False
+        )
 
         # Update the related profile with full_name
         if hasattr(user, "profile"):
@@ -126,7 +128,6 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source="user.email", read_only=True)
-  
 
     class Meta:
         model = Profile
@@ -140,4 +141,3 @@ class ProfileSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["slug", "created_at", "updated_at"]
-
