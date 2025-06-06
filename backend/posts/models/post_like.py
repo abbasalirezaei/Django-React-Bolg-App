@@ -6,10 +6,12 @@ from .post import Post
 
 User = get_user_model()
 
+
 class PostLike(models.Model):
     user = models.ForeignKey(
         User,
         verbose_name=_("User"),
+        related_name="likes",
         on_delete=models.CASCADE
     )
     post = models.ForeignKey(

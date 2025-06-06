@@ -11,6 +11,7 @@ class PostComment(models.Model):
         User,
         verbose_name=_("User"),
         on_delete=models.CASCADE,
+        related_name="comments",
         null=True
     )
     post = models.ForeignKey(

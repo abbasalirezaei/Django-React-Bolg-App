@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
 
 from .profiles import Profile
+
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -20,7 +22,6 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault("is_active", True)
         extra_fields.setdefault("verified", True)
 
-
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Superuser must have is_staff=True.")
         if extra_fields.get("is_superuser") is not True:
@@ -34,7 +35,8 @@ class User(AbstractUser):
         ('author', 'Author'),
         ('reader', 'Reader'),
     )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES,default='reader')
+    role = models.CharField(
+        max_length=10, choices=ROLE_CHOICES, default='reader')
     username = None  # Remove default username
     email = models.EmailField(unique=True)
 
@@ -43,6 +45,7 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
     objects = CustomUserManager()
+
     class Meta:
         db_table = 'Users'
         managed = True
@@ -55,3 +58,8 @@ class User(AbstractUser):
             return self.profile
         except Profile.DoesNotExist:
             return None
+
+    @property
+    def user_comments(self):
+        """Returns all comments made by the user."""
+        return self.comments.all()

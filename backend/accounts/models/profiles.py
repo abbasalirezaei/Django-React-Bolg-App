@@ -28,3 +28,7 @@ class Profile(models.Model):
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
+    @property
+    def user_comments(self):
+        """Access comments via user model."""
+        return self.user.user_comments

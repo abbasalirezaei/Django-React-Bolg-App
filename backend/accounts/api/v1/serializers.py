@@ -128,16 +128,20 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source="user.email", read_only=True)
-
+    user_comments=serializers.SerializerMethodField()
     class Meta:
         model = Profile
         fields = [
             "email",
+            "slug",
             "full_name",
             "bio",
             "image",
-            "slug",
+            "user_comments",
             "created_at",
             "updated_at",
         ]
         read_only_fields = ["slug", "created_at", "updated_at"]
+    def get_user_comments(self,obj):
+        """Retrieve all comments made by the user"""
+        return obj.user.comments.values("post__title", "content", "created_at")
