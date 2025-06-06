@@ -129,6 +129,8 @@ class ChangePasswordSerializer(serializers.Serializer):
 class ProfileSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source="user.email", read_only=True)
     user_comments=serializers.SerializerMethodField()
+    user_likes=serializers.SerializerMethodField()
+    user_posts=serializers.SerializerMethodField()
     class Meta:
         model = Profile
         fields = [
@@ -137,6 +139,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             "full_name",
             "bio",
             "image",
+            "user_posts",
+            "user_likes",
             "user_comments",
             "created_at",
             "updated_at",
@@ -145,3 +149,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_user_comments(self,obj):
         """Retrieve all comments made by the user"""
         return obj.user.comments.values("post__title", "content", "created_at")
+    def get_user_likes(self,obj):
+        """Retrieve all likes made by the user"""
+        return obj.user.likes.values("post__title")
+
