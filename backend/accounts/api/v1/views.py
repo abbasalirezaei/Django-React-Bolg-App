@@ -35,37 +35,8 @@ from .serializers import (
     ChangePasswordSerializer,
     ProfileSerializer
 )
-from ..utils import EmailThread
+from ..utils import EmailThread,send_activation_email
 User = get_user_model()
-
-
-def get_tokens_for_user(user):
-    """Generate and return a JWT access token for the given user."""
-    refresh = RefreshToken.for_user(user)
-
-    return str(refresh.access_token)
-
-
-def send_activation_email(user, email):
-    """Generate activation token and send an activation email asynchronously."""
-    # generate token
-    token = get_tokens_for_user(user)
-    # Define email parameters
-    subject = "Activate Your Account"
-    from_email = settings.EMAIL_HOST_USER
-    activation_link = f"http://localhost:8000/accounts/api/v1/activation/confirm/{token}"
-    context = {"activation_link": activation_link}
-
-    # Render email content
-    text_content = f"Your account activation link:\n{activation_link}"
-    html_content = render_to_string("email/activation_email.html", context)
-
-    # Create the email object
-    msg = EmailMultiAlternatives(subject, text_content, from_email, [email])
-    msg.attach_alternative(html_content, "text/html")
-
-    # Send email asynchronously using threading
-    EmailThread(msg).start()
 
 
 class RegistrationApiView(generics.GenericAPIView):
