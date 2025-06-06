@@ -1,4 +1,5 @@
 # rest_framework imports
+from ...models import Profile
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,6 +8,14 @@ from rest_framework.permissions import IsAuthenticated
 # django imports
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+
+from django.core.mail import send_mail
+
+
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+
+
 # third part imports
 from mail_templated import EmailMessage
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -28,7 +37,36 @@ from .serializers import (
 )
 from ..utils import EmailThread
 User = get_user_model()
-from ...models import Profile
+
+
+def get_tokens_for_user(user):
+    """Generate and return a JWT access token for the given user."""
+    refresh = RefreshToken.for_user(user)
+
+    return str(refresh.access_token)
+
+
+def send_activation_email(user, email):
+    """Generate activation token and send an activation email asynchronously."""
+    # generate token
+    token = get_tokens_for_user(user)
+    # Define email parameters
+    subject = "Activate Your Account"
+    from_email = settings.EMAIL_HOST_USER
+    activation_link = f"http://localhost:8000/accounts/api/v1/activation/confirm/{token}"
+    context = {"activation_link": activation_link}
+
+    # Render email content
+    text_content = f"Your account activation link:\n{activation_link}"
+    html_content = render_to_string("email/activation_email.html", context)
+
+    # Create the email object
+    msg = EmailMultiAlternatives(subject, text_content, from_email, [email])
+    msg.attach_alternative(html_content, "text/html")
+
+    # Send email asynchronously using threading
+    EmailThread(msg).start()
+
 
 class RegistrationApiView(generics.GenericAPIView):
     serializer_class = RegistrationSerializer
@@ -41,24 +79,11 @@ class RegistrationApiView(generics.GenericAPIView):
             data = {"email": email}
 
             user_obj = get_object_or_404(User, email=email)
-            token = self.get_tokens_for_user(user_obj)
-            email_obj = EmailMessage(
-                "email/activation_email.tpl",
-                {"token": token},
-                settings.EMAIL_HOST_USER,
-                to=[email],
-            )
+            send_activation_email(user_obj, email)
 
-            EmailThread(email_obj).start()
-            print(email_obj)
             return Response(data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def get_tokens_for_user(self, user):
-        refresh = RefreshToken.for_user(user)
-
-        return str(refresh.access_token)
 
 
 class ActivationAPIView(APIView):
@@ -75,6 +100,7 @@ class ActivationAPIView(APIView):
                     status=status.HTTP_200_OK,
                 )
             user_obj.verified = True
+            user_obj.is_active = True
             user_obj.save()
             return Response(
                 {"message": "Token is valid", "data": decoded_payload},
@@ -100,42 +126,28 @@ class ActivationAPIView(APIView):
 class ActivationResendAPIView(generics.GenericAPIView):
     serializer_class = ActivationResendSerializer
 
-    def post(self, request,  *args, **kwargs):
+    def post(self, request, *args, **kwargs):
+        # Validate the request data
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         email = serializer.validated_data["email"]
         user_obj = serializer.user_obj
+        # Check if the account is already verified
+
         if user_obj.verified:
             return Response(
                 {"message": "Your account is already activated"},
                 status=status.HTTP_200_OK,
             )
 
-        # Generate a new activation token
-        token = self.get_tokens_for_user(user_obj)
-
-        # Send activation email
-        email_obj = EmailMessage(
-            "email/activation_email.tpl",
-            {"token": token},
-            settings.EMAIL_HOST_USER,
-            to=[email],
-        )
-        EmailThread(email_obj).start()
-
+        send_activation_email(user_obj, email)
         return Response(
             {"message": "Activation email has been resent..."}, status=status.HTTP_200_OK
         )
 
-    def get_tokens_for_user(self, user):
-        refresh = RefreshToken.for_user(user)
-        return str(refresh.access_token)
-
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainSerializer
-
 
 
 class ChangePasswordAPIView(generics.GenericAPIView):
@@ -175,6 +187,7 @@ class ChangePasswordAPIView(generics.GenericAPIView):
             return Response(response)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ProfileAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer

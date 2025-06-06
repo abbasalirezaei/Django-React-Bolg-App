@@ -58,6 +58,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
         # Create the user instance
         user = User(email=validated_data["email"])
         user.set_password(validated_data["password"])
+        user.is_active=False
+        user.verified=False
         user.save()
 
         # Update the related profile with full_name
