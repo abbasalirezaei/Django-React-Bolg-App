@@ -1,10 +1,16 @@
 from rest_framework import serializers
 
 from posts.models import (
-    Post, Tag, PostComment, Category
+    Post, Tag, PostComment, Category, PostLike
 )
 
 from accounts.api.v1.serializers import ProfileSerializer
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostLike
+        fields = ["post", "created_at"]
 
 
 class PostCommentSerializer(serializers.ModelSerializer):
@@ -19,7 +25,7 @@ class PostCommentSerializer(serializers.ModelSerializer):
         return ProfileSerializer(obj.user.profile, context=self.context).data
 
     def validate_content(self, value):
-        spm_words = ["fucks", "fuck",'shit','idiot']
+        spm_words = ["fucks", "fuck", 'shit', 'idiot']
         for word in spm_words:
             if word.lower() in value.lower():
                 raise serializers.ValidationError(

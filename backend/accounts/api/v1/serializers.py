@@ -152,4 +152,24 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_user_likes(self,obj):
         """Retrieve all likes made by the user"""
         return obj.user.likes.values("post__title")
+    
+    def get_user_posts(self,obj):
+        """Retrieve all posts created by the user"""
 
+        if obj.user.role != "author":
+            return None
+
+        posts = obj.user.posts.prefetch_related("comments", "likes").all()
+
+        data = []
+        for post in posts:
+            post_data = {
+                "id": post.id,
+                "title": post.title,
+                "created_at": post.created_at,
+                "comments": list(post.comments.values("content", "created_at", "user__email")),
+                "likes_count":len(post.likes.all())
+            }
+            data.append(post_data)
+
+        return data
