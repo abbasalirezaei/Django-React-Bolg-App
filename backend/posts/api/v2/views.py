@@ -33,6 +33,7 @@ class PostListAPIView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, status=False)
 
+
 class CommentListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = PostCommentSerializer
 
@@ -44,7 +45,8 @@ class CommentListCreateAPIView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         post = get_object_or_404(Post, slug=self.kwargs['slug'], status=True)
         serializer.save(post=post, user=self.request.user)
-        
+
+
 class CommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PostCommentSerializer
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -57,6 +59,7 @@ class CommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         return get_object_or_404(
             self.get_queryset(), id=self.kwargs["comment_id"], post=post
         )
+
 
 class PostDetailAPIView(generics.GenericAPIView):
     serializer_class = PostSerializer
@@ -84,3 +87,7 @@ class PostDetailAPIView(generics.GenericAPIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Author Post list:
+

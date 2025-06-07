@@ -35,7 +35,7 @@ class UserAdmin(BaseUserAdmin):
     add_form = CustomUserCreationForm
     inlines = (ProfileInline, )
 
-    list_display = ("email", "role", "is_active", "is_staff", "verified", "is_online")
+    list_display = ("id","email", "role", "is_active", "is_staff", "verified", "is_online")
     list_filter = ("role", "is_staff", "verified", "is_active", "is_superuser")
     search_fields = ("email",)
     ordering = ("email",)

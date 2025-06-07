@@ -1,5 +1,6 @@
 # rest_framework imports
-from ...models import Profile
+
+from ...models import Profile, Follow
 from rest_framework import exceptions, serializers
 
 
@@ -128,9 +129,12 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source="user.email", read_only=True)
-    user_comments=serializers.SerializerMethodField()
-    user_likes=serializers.SerializerMethodField()
-    user_posts=serializers.SerializerMethodField()
+    user_comments = serializers.SerializerMethodField()
+    user_likes = serializers.SerializerMethodField()
+    user_posts = serializers.SerializerMethodField()
+    followers = serializers.SerializerMethodField()
+    following = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
         fields = [
@@ -142,18 +146,61 @@ class ProfileSerializer(serializers.ModelSerializer):
             "user_posts",
             "user_likes",
             "user_comments",
+            "followers",
+            "following",
+
             "created_at",
             "updated_at",
         ]
         read_only_fields = ["slug", "created_at", "updated_at"]
-    def get_user_comments(self,obj):
+
+    def get_user_comments(self, obj):
         """Retrieve all comments made by the user"""
         return obj.user.comments.values("post__title", "content", "created_at")
-    def get_user_likes(self,obj):
+
+    def get_followers(self, obj):
+        """Retrieve users who follow this user"""
+        follow_qs = obj.user.followers.select_related("from_user").all()
+
+        data = []
+        for follow in follow_qs:
+            user = follow.from_user
+            data.append({
+                "id": user.id,
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "joined": user.date_joined
+            })
+        return {
+            "count": len(data),
+            "users": data
+        }
+
+    def get_following(self, obj):
+        """Retrieve users that this user is following"""
+        follow_qs = obj.user.following.select_related("to_user").all()
+
+        data = []
+        for follow in follow_qs:
+            user = follow.to_user
+            data.append({
+                "id": user.id,
+                "username": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "joined": user.date_joined
+            })
+        return {
+            "count": len(data),
+            "users": data
+        }
+
+    def get_user_likes(self, obj):
         """Retrieve all likes made by the user"""
         return obj.user.likes.values("post__title")
-    
-    def get_user_posts(self,obj):
+
+    def get_user_posts(self, obj):
         """Retrieve all posts created by the user"""
 
         if obj.user.role != "author":
@@ -168,8 +215,33 @@ class ProfileSerializer(serializers.ModelSerializer):
                 "title": post.title,
                 "created_at": post.created_at,
                 "comments": list(post.comments.values("content", "created_at", "user__email")),
-                "likes_count":len(post.likes.all())
+                "likes_count": len(post.likes.all())
             }
             data.append(post_data)
 
         return data
+
+
+# follwing serializers
+class UserSerializer(serializers.ModelSerializer):
+    follower_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'follower_count', 'following_count']
+
+    def get_follower_count(self, obj):
+        return Follow.objects.filter(to_user=obj).count()
+
+    def get_following_count(self, obj):
+        return Follow.objects.filter(from_user=obj).count()
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    from_user = serializers.CharField(source='from_user.email')
+    to_user = serializers.CharField(source='to_user.email')
+
+    class Meta:
+        model = Follow
+        fields = ['from_user', 'to_user', 'created_at']
