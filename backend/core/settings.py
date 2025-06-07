@@ -34,8 +34,9 @@ INSTALLED_APPS = [
 
     # Custom
 
-    'posts',
-    'accounts',
+    'posts.apps.PostsConfig',
+    'accounts.apps.AccountsConfig',
+    'notification.apps.NotificationConfig',
 
 
     # third party

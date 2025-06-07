@@ -14,12 +14,18 @@ class LikeSerializer(serializers.ModelSerializer):
 
 
 class PostCommentSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField(read_only=True)
+    post = serializers.PrimaryKeyRelatedField(read_only=True)
+    parent = serializers.PrimaryKeyRelatedField(
+        queryset=PostComment.objects.all(), 
+        allow_null=True, 
+        required=False
+    )
 
     class Meta:
         model = PostComment
-        fields = ['id', 'user', 'content', 'created_at', 'parent']
-        read_only_fields = ['user', 'created_at',]
+        fields = ['id', 'user', 'content', 'created_at', 'parent', 'post']
+        read_only_fields = ['user', 'created_at', 'post']
 
     def get_user(self, obj):
         return ProfileSerializer(obj.user.profile, context=self.context).data
@@ -31,6 +37,7 @@ class PostCommentSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "Your comment contains spam words.")
         return value
+
 
 
 class TagSerializer(serializers.ModelSerializer):

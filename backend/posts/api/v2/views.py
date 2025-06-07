@@ -3,7 +3,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
-from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 # django imports
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
@@ -19,7 +19,7 @@ from .serializers import (
 from posts.models import (
     Post, Tag, PostComment
 )
-from accounts.models import Profile
+from accounts.models import Profile, Follow
 
 from .permissions import IsAuthorOrReadOnly
 
@@ -33,7 +33,6 @@ class PostListAPIView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, status=False)
-
 
 
 class PostDetailAPIView(generics.GenericAPIView):
@@ -62,7 +61,6 @@ class PostDetailAPIView(generics.GenericAPIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class CommentListCreateAPIView(generics.ListCreateAPIView):
@@ -108,3 +106,24 @@ class AuthorPostsAPIView(generics.ListAPIView):
             return Post.objects.none()
 
         return Post.objects.filter(author=user).select_related("author")
+
+
+class FeedAPIView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # list of users that the current user is following
+        list_of_following = Follow.objects.filter(
+            from_user=self.request.user).values_list('to_user', flat=True)
+        # if the user is not following anyone, return no posts
+        if not list_of_following:
+            return Post.objects.none()
+        # filter posts from those users that are published (status=True)
+        qs= Post.objects.filter(
+            author__in=list_of_following,
+            status=True
+        ).order_by('-created_at').select_related("author").prefetch_related("tags", 'categories')
+        return qs
+    
+

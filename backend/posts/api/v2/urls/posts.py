@@ -18,8 +18,9 @@ urlpatterns = [
         name="comment-detail"
     ),
 
-    path("author/<slug:slug>/posts/", views.AuthorPostsAPIView.as_view(), name="author-posts"),
 
     # authors posts
+    path("author/<slug:slug>/posts/", views.AuthorPostsAPIView.as_view(), name="author-posts"),
+    path("feed/", views.FeedAPIView.as_view(), name="author-posts"),
 
 ]

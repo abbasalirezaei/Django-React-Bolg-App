@@ -51,7 +51,10 @@ class RegistrationApiView(generics.GenericAPIView):
         if serializer.is_valid():
             serializer.save()
             email = serializer.validated_data["email"]
-            data = {"email": email}
+            data = {
+                "email": email,
+                "message": "Account created successfully, please check your email to activate your account."
+            }
 
             user_obj = get_object_or_404(User, email=email)
             send_activation_email(user_obj, email)
@@ -71,14 +74,15 @@ class ActivationAPIView(APIView):
             user_obj = User.objects.get(id=user_id)
             if user_obj.verified:
                 return Response(
-                    {"message": "your account already Activate"},
+                    {"message": "Your account is already activated."},
                     status=status.HTTP_200_OK,
                 )
             user_obj.verified = True
             user_obj.is_active = True
             user_obj.save()
             return Response(
-                {"message": "Token is valid", "data": decoded_payload},
+                {"message": "Your account has been activated successfully.",
+                    "data": decoded_payload},
                 status=status.HTTP_200_OK,
             )
         else:
@@ -93,9 +97,9 @@ class ActivationAPIView(APIView):
             )
             return decoded_payload, None
         except jwt.ExpiredSignatureError:
-            return None, "Token has expired"
+            return None, "Token has expired and is no longer valid please request a new one"
         except jwt.InvalidTokenError:
-            return None, "Token is invalid"
+            return None, "Token is invalid please request a new one"
 
 
 class ActivationResendAPIView(generics.GenericAPIView):
@@ -117,7 +121,7 @@ class ActivationResendAPIView(generics.GenericAPIView):
 
         send_activation_email(user_obj, email)
         return Response(
-            {"message": "Activation email has been resent..."}, status=status.HTTP_200_OK
+            {"message": "Activation Email has been reset ... "}, status=status.HTTP_200_OK
         )
 
 
