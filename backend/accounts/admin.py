@@ -22,10 +22,12 @@ class CustomUserCreationForm(UserCreationForm):
         model = User
         fields = ("email", "role")
 
+
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = User
-        fields = ("email", "role", "is_active", "is_staff", "verified", "is_online")
+        fields = ("email", "role", "is_active",
+                  "is_staff", "verified", "is_online")
 
 
 # --- Custom User Admin ---
@@ -35,7 +37,8 @@ class UserAdmin(BaseUserAdmin):
     add_form = CustomUserCreationForm
     inlines = (ProfileInline, )
 
-    list_display = ("id","email", "role", "is_active", "is_staff", "verified", "is_online")
+    list_display = ("id", "email", "role", "is_active",
+                    "is_staff", "verified", "is_online")
     list_filter = ("role", "is_staff", "verified", "is_active", "is_superuser")
     search_fields = ("email",)
     ordering = ("email",)
@@ -43,7 +46,8 @@ class UserAdmin(BaseUserAdmin):
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
+        ("Permissions", {"fields": ("is_active", "is_staff",
+         "is_superuser", "groups", "user_permissions")}),
         ("Status", {"fields": ("verified", "is_online")}),
         ("Role", {"fields": ("role",)}),
     )
@@ -52,7 +56,7 @@ class UserAdmin(BaseUserAdmin):
         (None, {
             "classes": ("wide",),
             "fields": ("email", "role", "password1", "password2", "is_active", "is_staff", "is_superuser")}
-        ),
+         ),
     )
 
     def get_inline_instances(self, request, obj=None):
@@ -66,5 +70,5 @@ class UserAdmin(BaseUserAdmin):
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ("user", "full_name", "slug", "created_at")
     search_fields = ("user__email", "full_name", "slug")
-    readonly_fields = ("slug", "created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at")
     ordering = ("-created_at",)
