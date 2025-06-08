@@ -19,13 +19,16 @@ urlpatterns = [
     ),
 
     # post-like
-    path("post/<slug:slug>/like/", views.PostLikeAPIView.as_view(), name="post-like"),
+    path("post/<slug:slug>/like/",
+         views.PostLikeAPIView.as_view(), name="post-like"),
 
     # authors posts
-    path("author/<slug:slug>/posts/", views.AuthorPostsAPIView.as_view(), name="author-posts"),
+    path("author/<slug:slug>/posts/",
+         views.AuthorPostsAPIView.as_view(), name="author-posts"),
     path("feed/", views.FeedAPIView.as_view(), name="author-posts"),
 
 
     # post-bookmark
-    path("post/<slug:slug>/bookmark/", views.PostBookmarkAPIView.as_view(), name="post-bookmark"),
+    path("post/<slug:slug>/bookmark-toggle/",
+         views.TogglePostBookmarkAPIView.as_view(), name="post-bookmark-toggle"),
 ]

@@ -63,6 +63,7 @@ class PostDetailAPIView(generics.GenericAPIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @swagger_auto_schema(
     operation_summary="Retrieve, Update, or Delete a Comment",
     operation_description="Allows users to retrieve, update or delete a specific comment by ID.",
@@ -163,24 +164,19 @@ class FeedAPIView(generics.ListAPIView):
 # make a bookmark for a post
 
 
-class PostBookmarkAPIView(generics.CreateAPIView):
-    serializer_class = PostBookmarkSerializer
+class TogglePostBookmarkAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def perform_create(self, serializer):
-        user = self.request.user
-        post_slug = self.kwargs.get('slug') 
-        post = get_object_or_404(Post, slug=post_slug)
-        
-        # Prevent duplicate bookmarks
-        if PostBookmark.objects.filter(user=user, post=post).exists():
-            raise serializers.ValidationError({"detail": "You have already bookmarked this post."})
-            
-        serializer.save(user=user, post=post)
+    def post(self, request, slug):
+        post = get_object_or_404(Post, slug=slug)
+        user = request.user
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        bookmark, created = PostBookmark.objects.get_or_create(
+            user=user, post=post)
 
+        if not created:
+            # Bookmark already exists → remove it
+            bookmark.delete()
+            return Response({"detail": "Bookmark removed."}, status=200)
+
+        return Response({"detail": "Post bookmarked."}, status=201)
