@@ -11,7 +11,7 @@ from .models import Notification
 @receiver(post_save, sender=Follow)
 def create_follow_notification(sender, instance, created, **kwargs):
     if created:
-        Notification.objects.create(
+        Notification.objects.get_or_create(
             recipient=instance.to_user,
             actor=instance.from_user,
             notification_type='FOLLOW'
@@ -21,7 +21,7 @@ def create_follow_notification(sender, instance, created, **kwargs):
 def create_comment_notification(sender, instance, created, **kwargs):
     # prevent notification for comments made by the user on their own posts
     if created and instance.user != instance.post.author: 
-        Notification.objects.create(
+        Notification.objects.get_or_create(
             recipient=instance.post.author,
             actor=instance.user,
             notification_type='COMMENT',
@@ -33,7 +33,7 @@ def create_comment_notification(sender, instance, created, **kwargs):
 def create_like_notification(sender, instance, created, **kwargs):
     # prevent notification for likes made by the user on their own posts
     if created and instance.user != instance.post.author: 
-        Notification.objects.create(
+        Notification.objects.get_or_create(
             recipient=instance.post.author,
             actor=instance.user,
             notification_type='LIKE',
