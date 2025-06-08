@@ -171,9 +171,10 @@ class TogglePostBookmarkAPIView(APIView):
         post = get_object_or_404(Post, slug=slug)
         user = request.user
 
-        bookmark, created = PostBookmark.objects.get_or_create(
-            user=user, post=post)
-
+        try:
+            bookmark, created = PostBookmark.objects.get_or_create(user=user, post=post)
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=400)
         if not created:
             # Bookmark already exists → remove it
             bookmark.delete()
