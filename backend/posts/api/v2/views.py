@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 # django imports
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-
+from drf_yasg.utils import swagger_auto_schema
 
 # local imports
 from .serializers import (
@@ -17,7 +17,7 @@ from .serializers import (
 
 
 from posts.models import (
-    Post, Tag, PostComment
+    Post, Tag, PostComment, PostLike
 )
 from accounts.models import Profile, Follow
 
@@ -62,7 +62,11 @@ class PostDetailAPIView(generics.GenericAPIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+@swagger_auto_schema(
+    operation_summary="Retrieve, Update, or Delete a Comment",
+    operation_description="Allows users to retrieve, update or delete a specific comment by ID.",
+    tags=["comments"]
+)
 class CommentListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = PostCommentSerializer
 
@@ -88,6 +92,34 @@ class CommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         return get_object_or_404(
             self.get_queryset(), id=self.kwargs["comment_id"], post=post
         )
+
+
+# Post Likes
+
+
+class PostLikeAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(tags=['posts-likes'])
+    def post(self, request, slug):
+        post = get_object_or_404(Post, slug=slug, status=True)
+        like, created = PostLike.objects.get_or_create(
+            post=post, user=request.user)
+
+        if not created:
+            return Response({"detail": "You have already liked this post."}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"detail": "Post liked successfully."}, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(tags=['posts-likes'])
+    def delete(self, request, slug):
+        post = get_object_or_404(Post, slug=slug, status=True)
+        try:
+            like = PostLike.objects.get(post=post, user=request.user)
+            like.delete()
+            return Response({"detail": "Post unliked successfully."}, status=status.HTTP_204_NO_CONTENT)
+        except PostLike.DoesNotExist:
+            return Response({"detail": "You have not liked this post."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Author Post list:
@@ -120,10 +152,8 @@ class FeedAPIView(generics.ListAPIView):
         if not list_of_following:
             return Post.objects.none()
         # filter posts from those users that are published (status=True)
-        qs= Post.objects.filter(
+        qs = Post.objects.filter(
             author__in=list_of_following,
             status=True
         ).order_by('-created_at').select_related("author").prefetch_related("tags", 'categories')
         return qs
-    
-
