@@ -5,3 +5,4 @@ from .post_view import PostView
 from .post_like import PostLike
 from .post_comment import PostComment
 from .comment_like import CommentLike
+from .post_bookmark import PostBookmark
