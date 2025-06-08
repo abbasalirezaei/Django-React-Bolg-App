@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import (
-    Category, Tag, Post, PostView, PostLike, PostComment, CommentLike
+    Category, Tag, Post, PostView, PostLike, PostComment, CommentLike,PostBookmark
 )
 
 
@@ -23,6 +23,13 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)
 
+
+@admin.register(PostBookmark)
+class BookmarkAdmin(admin.ModelAdmin):
+    list_display = ('user', 'post', 'created_at')
+    search_fields = ('user__email', 'post__title')
+    list_filter = ('created_at',)
+    ordering = ('-created_at',)
 
 class PostViewInline(admin.TabularInline):
     model = PostView

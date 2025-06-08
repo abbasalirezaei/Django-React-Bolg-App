@@ -37,6 +37,8 @@ from .serializers import (
     FollowSerializer,
     UserSerializer
 )
+from posts.api.v2.serializers import PostBookmarkSerializer
+from posts.models import PostBookmark
 from ...models import Profile, Follow
 
 from ..utils import EmailThread, send_activation_email
@@ -242,3 +244,19 @@ class FollowingListView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+# bookmarks
+class UserBookmarksAPIView(generics.ListAPIView):
+    serializer_class = PostBookmarkSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.bookmarked_posts.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

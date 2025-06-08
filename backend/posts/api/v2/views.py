@@ -2,7 +2,7 @@
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, generics
+from rest_framework import status, generics, serializers
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 # django imports
 from django.shortcuts import get_object_or_404
@@ -12,12 +12,13 @@ from drf_yasg.utils import swagger_auto_schema
 # local imports
 from .serializers import (
     PostSerializer,
-    PostCommentSerializer
+    PostCommentSerializer,
+    PostBookmarkSerializer
 )
 
 
 from posts.models import (
-    Post, Tag, PostComment, PostLike
+    Post, Tag, PostComment, PostLike, PostBookmark
 )
 from accounts.models import Profile, Follow
 
@@ -157,3 +158,29 @@ class FeedAPIView(generics.ListAPIView):
             status=True
         ).order_by('-created_at').select_related("author").prefetch_related("tags", 'categories')
         return qs
+
+
+# make a bookmark for a post
+
+
+class PostBookmarkAPIView(generics.CreateAPIView):
+    serializer_class = PostBookmarkSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        post_slug = self.kwargs.get('slug') 
+        post = get_object_or_404(Post, slug=post_slug)
+        
+        # Prevent duplicate bookmarks
+        if PostBookmark.objects.filter(user=user, post=post).exists():
+            raise serializers.ValidationError({"detail": "You have already bookmarked this post."})
+            
+        serializer.save(user=user, post=post)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+

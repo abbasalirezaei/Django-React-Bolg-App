@@ -1,17 +1,18 @@
 # rest_framework imports
 
-from ...models import Profile, Follow
+
 from rest_framework import exceptions, serializers
 
+# third party imports
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 # django import
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 
 
-# third party imports
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # locals import
+from ...models import Profile, Follow
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -245,3 +246,5 @@ class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = ['from_user', 'to_user', 'created_at']
+
+

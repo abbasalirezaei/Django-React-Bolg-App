@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from posts.models import (
-    Post, Tag, PostComment, Category, PostLike
+    Post, Tag, PostComment, Category, PostLike, PostBookmark
 )
 
 from accounts.api.v1.serializers import ProfileSerializer
@@ -83,3 +83,17 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_likes(self, obj):
         return obj.likes.count()
+
+
+
+class PostBookmarkSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField(read_only=True)
+    post = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = PostBookmark
+        fields = ['id', 'user', 'post', 'created_at']
+        read_only_fields = ['user', 'post', 'created_at']
+
+    def get_user(self, obj):
+        return ProfileSerializer(obj.user.profile, context=self.context).data
