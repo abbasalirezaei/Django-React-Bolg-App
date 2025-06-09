@@ -20,13 +20,27 @@ from .serializers import (
 
 
 from posts.models import (
-    Post, Tag, PostComment, PostLike, PostBookmark
+    Post, Tag, PostComment, PostLike, PostBookmark, CommentLike
 )
 from accounts.models import Profile, Follow
 
 from .permissions import IsAuthorOrReadOnly
 
 User = get_user_model()
+
+"""
+list of views for the posts app:
+1. PostListAPIView: for listing and creating posts just author can create.
+2. PostDetailAPIView: for retrieving, updating, and deleting a specific post by slug just author can update or delete.
+3. CommentListCreateAPIView: for listing and creating comments on a specific post, just authenticated users can create comments.
+4. CommentDetailAPIView: for retrieving, updating, and deleting a specific comment by ID.
+5. PostLikeAPIView: for liking and unliking a post, just authenticated users can like or unlike.
+6. AuthorPostsAPIView: for listing posts by a specific author.
+7. FeedAPIView: for listing posts from users that the current user is following.
+8. TogglePostBookmarkAPIView: for bookmarking and unbookmarking a post, just authenticated users can bookmark or unbookmark.
+9. CommentLikeAPIView: for liking and unliking a comment, just authenticated users can like or unlike comments.
+
+"""
 
 
 class PostListAPIView(generics.ListCreateAPIView):
@@ -101,10 +115,38 @@ class CommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
             self.get_queryset(), id=self.kwargs["comment_id"], post=post
         )
 
+# ToggleComment Like
+
+class ToggleCommentLikeAPIView(APIView):
+    """
+    ToggleCommentLikeAPIView allows users to like or unlike a comment.
+    - If created is True, a new like was added.
+    - If created is False, the like already existed and is removed.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(tags=['comments-likes'])
+    def post(self, request, comment_id):
+        comment = get_object_or_404(PostComment, id=comment_id)
+
+        like, created = CommentLike.objects.get_or_create(
+            user=request.user, comment_blog_item=comment
+        )
+
+        if not created:
+            like.delete()
+            return Response(
+                {"detail": "Comment unliked successfully."},
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            {"detail": "Comment liked successfully."},
+            status=status.HTTP_201_CREATED
+        )
+
 
 # Post Likes
-
-
 class PostLikeAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -168,8 +210,6 @@ class FeedAPIView(generics.ListAPIView):
 
 
 # make a bookmark for a post
-
-
 class TogglePostBookmarkAPIView(APIView):
     permission_classes = [IsAuthenticated]
 

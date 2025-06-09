@@ -1,18 +1,35 @@
 from rest_framework import serializers
 
 from posts.models import (
-    Post, Tag, PostComment, Category, PostLike, PostBookmark
+    Post, Tag, PostComment, Category, PostLike, PostBookmark,CommentLike
 )
 
 from accounts.api.v1.serializers import ProfileSerializer
 
 
+"""
+list of serializers for the posts app:
+1. PostSerializer: for serializing Post model data.
+2. PostCommentSerializer: for serializing PostComment model data.
+3. TagSerializer: for serializing Tag model data.
+4. CategorySerializer: for serializing Category model data.
+5. PostBookmarkSerializer: for serializing PostBookmark model data.
+6. LikeSerializer: for serializing PostLike model data.
+7. CommentLikeSerializer: for serializing PostCommentLike model data.
+
+
+8. ProfileSerializer: for serializing Profile model data.
+9. FollowSerializer: for serializing Follow model data.
+"""
+
+
+# like serializer
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostLike
         fields = ["post", "created_at"]
 
-
+# comments serializer
 class PostCommentSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
     post = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -39,7 +56,7 @@ class PostCommentSerializer(serializers.ModelSerializer):
         return value
 
 
-
+# tag serializer
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
@@ -47,13 +64,13 @@ class TagSerializer(serializers.ModelSerializer):
             "name",
         ]
 
-
+# category serializer
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name']
 
-
+# post serializer
 class PostSerializer(serializers.ModelSerializer):
     comments = PostCommentSerializer(many=True, read_only=True)
     author = ProfileSerializer(source='author.profile', read_only=True)
@@ -85,7 +102,7 @@ class PostSerializer(serializers.ModelSerializer):
         return obj.likes.count()
 
 
-
+# post bookmark serializer
 class PostBookmarkSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
     post = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -94,6 +111,21 @@ class PostBookmarkSerializer(serializers.ModelSerializer):
         model = PostBookmark
         fields = ['id', 'user', 'post', 'created_at']
         read_only_fields = ['user', 'post', 'created_at']
+
+    def get_user(self, obj):
+        return ProfileSerializer(obj.user.profile, context=self.context).data
+    
+
+# comment like serializer
+class CommentLikeSerializer(serializers.ModelSerializer):
+    """Serializer for PostCommentLike model."""
+    user = serializers.SerializerMethodField(read_only=True)
+    comment_blog_item = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = CommentLike
+        fields = ['id', 'user', 'comment_blog_item', 'created_at']
+        read_only_fields = ['user', 'comment_blog_item', 'created_at']
 
     def get_user(self, obj):
         return ProfileSerializer(obj.user.profile, context=self.context).data

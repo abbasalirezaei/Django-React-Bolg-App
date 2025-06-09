@@ -8,15 +8,6 @@ urlpatterns = [
 
     # post-detail
     path("post/<str:slug>/", views.PostDetailAPIView.as_view(), name="post-detail"),
-    # author  can create post, update
-    path("post/<str:slug>/comments/",
-         views.CommentListCreateAPIView.as_view(), name="comments"),
-
-    path(
-        "post/<slug:slug>/comment/<int:comment_id>/",
-        views.CommentDetailAPIView.as_view(),
-        name="comment-detail"
-    ),
 
     # post-like
     path("post/<slug:slug>/like/",

@@ -5,6 +5,7 @@ class Notification(models.Model):
     NOTIFICATION_TYPES = (
         ('FOLLOW', 'Follow'),
         ('COMMENT', 'Comment'),
+        ('COMMENT_LIKE', 'Comment Like'),
         ('LIKE', 'Like'),
     )
 

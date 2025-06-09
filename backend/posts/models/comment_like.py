@@ -7,6 +7,11 @@ from .post_comment import PostComment
 User = get_user_model()
 
 class CommentLike(models.Model):
+    """
+    CommentLike model to represent likes on comments.
+    Each like is associated with a user and a comment.
+    This model allows users to like comments on blog posts.s
+    """
     user = models.ForeignKey(
         User,
         verbose_name=_("User"),
