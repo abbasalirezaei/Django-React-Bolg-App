@@ -5,6 +5,7 @@ from django import forms
 
 from .models.users import User
 from .models.profiles import Profile
+from .models.follow import Follow
 
 
 # --- Inline Profile ---
@@ -26,8 +27,7 @@ class CustomUserCreationForm(UserCreationForm):
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = User
-        fields = ("email", "role", "is_active",
-                  "is_staff", "verified", "is_online")
+        fields = ("email", "role", "is_active", "is_staff", "verified", "is_online")
 
 
 # --- Custom User Admin ---
@@ -35,10 +35,9 @@ class CustomUserChangeForm(UserChangeForm):
 class UserAdmin(BaseUserAdmin):
     form = CustomUserChangeForm
     add_form = CustomUserCreationForm
-    inlines = (ProfileInline, )
+    inlines = (ProfileInline,) 
 
-    list_display = ("id", "email", "role", "is_active",
-                    "is_staff", "verified", "is_online")
+    list_display = ("id", "email", "role", "is_active", "is_staff", "verified", "is_online")
     list_filter = ("role", "is_staff", "verified", "is_active", "is_superuser")
     search_fields = ("email",)
     ordering = ("email",)
@@ -46,8 +45,7 @@ class UserAdmin(BaseUserAdmin):
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        ("Permissions", {"fields": ("is_active", "is_staff",
-         "is_superuser", "groups", "user_permissions")}),
+        ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
         ("Status", {"fields": ("verified", "is_online")}),
         ("Role", {"fields": ("role",)}),
     )
@@ -65,10 +63,27 @@ class UserAdmin(BaseUserAdmin):
         return super().get_inline_instances(request, obj)
 
 
-# --- Optional: Register Profile separately (if you want) ---
+# --- Profile Admin ---
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ("user", "full_name", "slug", "created_at")
     search_fields = ("user__email", "full_name", "slug")
     readonly_fields = ("created_at", "updated_at")
     ordering = ("-created_at",)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('user')
+
+
+# --- Follow Admin ---
+@admin.register(Follow)
+class FollowAdmin(admin.ModelAdmin):
+    list_display = ('from_user', 'to_user', 'created_at')
+    search_fields = ('from_user__email', 'to_user__email')
+    list_filter = ('created_at',)
+    ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'updated_at')
+    autocomplete_fields = ['from_user', 'to_user']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('from_user', 'to_user')

@@ -1,21 +1,25 @@
 from django.contrib import admin
 from django.utils.html import format_html
+
 from .models import (
-    Category, Tag, Post, PostView, PostLike, PostComment, CommentLike,PostBookmark
+    Category, Tag, Post, PostView, PostLike, PostComment,
+    CommentLike, PostBookmark
 )
 
-
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "body", "image_tag")
-    search_fields = ("name",)
-    readonly_fields = ("image_tag",)
-
+# --- Shared Mixin for image preview fields ---
+class ImagePreviewMixin:
     def image_tag(self, obj):
-        if obj.img:
+        if hasattr(obj, 'img') and obj.img:
             return format_html('<img src="{}" style="width: 50px; height:auto;" />', obj.img.url)
         return "-"
     image_tag.short_description = "Image"
+
+# --- Admins ---
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin, ImagePreviewMixin):
+    list_display = ("name", "body", "image_tag")
+    search_fields = ("name",)
+    readonly_fields = ("image_tag",)
 
 
 @admin.register(Tag)
@@ -31,6 +35,8 @@ class BookmarkAdmin(admin.ModelAdmin):
     list_filter = ('created_at',)
     ordering = ('-created_at',)
 
+
+# --- Inline Models ---
 class PostViewInline(admin.TabularInline):
     model = PostView
     readonly_fields = ("ip_address", "created_at")
@@ -38,6 +44,7 @@ class PostViewInline(admin.TabularInline):
     can_delete = False
     verbose_name = "View Record"
     verbose_name_plural = "View Records"
+    classes = ['collapse']
 
 
 class PostLikeInline(admin.TabularInline):
@@ -45,6 +52,7 @@ class PostLikeInline(admin.TabularInline):
     readonly_fields = ("user",)
     extra = 0
     can_delete = False
+    classes = ['collapse']
 
 
 class PostCommentInline(admin.TabularInline):
@@ -52,42 +60,39 @@ class PostCommentInline(admin.TabularInline):
     fields = ("user", "content", "parent", "created_at")
     readonly_fields = ("created_at",)
     extra = 0
+    classes = ['collapse']
 
 
+# --- Post Admin ---
 @admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
+class PostAdmin(admin.ModelAdmin, ImagePreviewMixin):
     list_display = (
-        "title",
-        "author_email",
-        "status",
-        "is_featured",
-        "created_at",
-        "updated_at",
-        "reading_time",
-        "views_count",
+        "title", "author_email", "status", "is_featured",
+        "created_at", "updated_at", "reading_time",
+        "views_count", "image_tag",
     )
-    search_fields = ("title", "description", "author__email",
-                     "categories__name", "tags__name")
+    search_fields = (
+        "title", "description", "author__email",
+        "categories__name", "tags__name"
+    )
+    ordering = ("-created_at",)
+    filter_horizontal = ("categories", "tags")
+    autocomplete_fields = ("author", "categories", "tags")
     list_filter = ("status", "is_featured", "categories", "tags", "created_at")
-    readonly_fields = ("created_at", "updated_at", "views_count")
+    list_editable = ("status", "is_featured")
     prepopulated_fields = {"slug": ("title",)}
 
     fieldsets = (
-        (None, {
-            "fields": ("title", "slug", "author", "status", "is_featured", "img")
-        }),
-        ("Content", {
-            "fields": ("description", "short_description", "reading_time")
-        }),
-        ("Relations", {
-            "fields": ("categories", "tags")
-        }),
+        (None, {"fields": ("title", "slug", "author", "status", "is_featured", "img")}),
+        ("Content", {"fields": ("description", "short_description", "reading_time")}),
+        ("Relations", {"fields": ("categories", "tags")}),
         ("Timestamps & Stats", {
-            "fields": ("created_at", "updated_at", "views_count"),
+            "fields": ("created_at", "updated_at", "views_count", "image_tag"),
             "classes": ("collapse",),
         }),
     )
 
+    readonly_fields = ("created_at", "updated_at", "views_count", "image_tag")
     inlines = [PostViewInline, PostLikeInline, PostCommentInline]
 
     def author_email(self, obj):
@@ -99,7 +104,6 @@ class PostAdmin(admin.ModelAdmin):
     views_count.short_description = "Views"
 
     def get_readonly_fields(self, request, obj=None):
-        # Make reading_time read-only on edit to avoid manual changes
         ro_fields = list(super().get_readonly_fields(request, obj))
         if obj:
             ro_fields.append("reading_time")
@@ -108,8 +112,7 @@ class PostAdmin(admin.ModelAdmin):
 
 @admin.register(PostComment)
 class PostCommentAdmin(admin.ModelAdmin):
-    list_display = ("short_content", "user_email",
-                    "post_title", "parent", "created_at")
+    list_display = ("short_content", "user_email", "post_title", "parent", "created_at")
     search_fields = ("content", "user__email", "post__title")
     list_filter = ("created_at",)
     readonly_fields = ("created_at", "updated_at")
@@ -165,3 +168,5 @@ class PostViewAdmin(admin.ModelAdmin):
     def post_title(self, obj):
         return obj.post.title
     post_title.short_description = "Post"
+
+

@@ -51,4 +51,4 @@ class Follow(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.from_user.username} follows {self.to_user.username}"
+        return f"{self.from_user.email} follows {self.to_user.email}"
