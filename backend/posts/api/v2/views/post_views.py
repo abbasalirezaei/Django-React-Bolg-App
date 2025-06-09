@@ -11,20 +11,18 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 
+
 # local imports
-from ..serializers.post_serializers import (
-    PostSerializer,
-)
-
-
-from posts.models import (
-    Post, PostBookmark
-)
-from accounts.models import Profile, Follow
-
+from ..serializers.post_serializers import (PostSerializer,)
 from ..permissions import IsAuthorOrReadOnly
 
+from posts.api.utils import get_client_ip
+from posts.models import (Post, PostBookmark)
+from accounts.models import Profile, Follow
+
+
 User = get_user_model()
+
 
 class PostListAPIView(generics.ListCreateAPIView):
     serializer_class = PostSerializer
@@ -48,6 +46,15 @@ class PostDetailAPIView(generics.GenericAPIView):
     def get(self, request, slug, *args, **kwargs):
         post = self.get_object()
         serializer = self.get_serializer(post)
+        # record the post view
+        ip_address = get_client_ip(request)
+        # check if the post view already exists for this IP address
+        if not post.view_records.filter(ip_address=ip_address).exists():
+            post.view_records.create(ip_address=ip_address)
+            # increment the view count
+        post.view_count += 1
+        post.save(update_fields=['view_count'])
+        # return the serialized data
         return Response(serializer.data)
 
     def put(self, request, slug, *args, **kwargs):
@@ -65,9 +72,6 @@ class PostDetailAPIView(generics.GenericAPIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
 
 
 class AuthorPostsAPIView(generics.ListAPIView):
