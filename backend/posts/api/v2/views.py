@@ -4,6 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics, serializers
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+
+from rest_framework.filters import SearchFilter
 # django imports
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
@@ -31,6 +33,10 @@ class PostListAPIView(generics.ListCreateAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.filter(status=True)
     permission_classes = [IsAuthorOrReadOnly]
+    filter_backends = [SearchFilter]
+    # ordering_fields = ['created_at', 'updated_at']
+    # filterset_fields = ['categories', 'tags']
+    search_fields = ['title', 'description']
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, status=False)
@@ -172,8 +178,11 @@ class TogglePostBookmarkAPIView(APIView):
         user = request.user
 
         try:
-            bookmark, created = PostBookmark.objects.get_or_create(user=user, post=post)
+            bookmark, created = PostBookmark.objects.get_or_create(
+                user=user, post=post)
         except ValueError as e:
+            # Handle the case where a user tries to bookmark their own post
+            # This is a custom validation in the PostBookmark model
             return Response({"detail": str(e)}, status=400)
         if not created:
             # Bookmark already exists → remove it
