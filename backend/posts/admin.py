@@ -69,7 +69,7 @@ class PostAdmin(admin.ModelAdmin, ImagePreviewMixin):
     list_display = (
         "title", "author_email", "status", "is_featured",
         "created_at", "updated_at", "reading_time",
-        "views_count", "image_tag",
+        "view_count", "image_tag",
     )
     search_fields = (
         "title", "description", "author__email",
@@ -87,12 +87,12 @@ class PostAdmin(admin.ModelAdmin, ImagePreviewMixin):
         ("Content", {"fields": ("description", "short_description", "reading_time")}),
         ("Relations", {"fields": ("categories", "tags")}),
         ("Timestamps & Stats", {
-            "fields": ("created_at", "updated_at", "views_count", "image_tag"),
+            "fields": ("created_at", "updated_at", "view_count", "image_tag"),
             "classes": ("collapse",),
         }),
     )
 
-    readonly_fields = ("created_at", "updated_at", "views_count", "image_tag")
+    readonly_fields = ("created_at", "updated_at", "view_count", "image_tag")
     inlines = [PostViewInline, PostLikeInline, PostCommentInline]
 
     def author_email(self, obj):
