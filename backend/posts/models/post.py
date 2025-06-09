@@ -27,6 +27,7 @@ class Post(models.Model):
     img = models.ImageField(_("Post image"), upload_to="blog_image/", blank=True, null=True)
     status = models.BooleanField(_("Published status"), default=False)
     is_featured = models.BooleanField(_("Featured"), default=False)
+    view_count = models.PositiveIntegerField(_("View Count"), default=0)
 
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
@@ -52,10 +53,12 @@ class Post(models.Model):
     def increment_views(self, ip_address):
         if not self.view_records.filter(ip_address=ip_address).exists():
             PostView.objects.create(post=self, ip_address=ip_address)
+            self.view_count += 1
+            self.save(update_fields=['view_count'])
 
     @property
     def views(self):
         return self.view_records.count()
     @property
     def likes_count(self):
-        return self.likes.count()
+        return self.views_count()

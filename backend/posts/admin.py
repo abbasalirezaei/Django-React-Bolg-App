@@ -99,10 +99,6 @@ class PostAdmin(admin.ModelAdmin, ImagePreviewMixin):
         return obj.author.email if obj.author else "-"
     author_email.short_description = "Author Email"
 
-    def views_count(self, obj):
-        return obj.views
-    views_count.short_description = "Views"
-
     def get_readonly_fields(self, request, obj=None):
         ro_fields = list(super().get_readonly_fields(request, obj))
         if obj:
