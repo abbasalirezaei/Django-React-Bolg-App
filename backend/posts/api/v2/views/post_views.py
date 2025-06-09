@@ -37,41 +37,20 @@ class PostListAPIView(generics.ListCreateAPIView):
         serializer.save(author=self.request.user, status=False)
 
 
-class PostDetailAPIView(generics.GenericAPIView):
-    serializer_class = PostSerializer
+class PostDetailAPIView(generics.RetrieveUpdateAPIView):
     queryset = Post.objects.filter(status=True)
-    permission_classes = [IsAuthorOrReadOnly]
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthorOrReadOnly,]
     lookup_field = "slug"
 
-    def get(self, request, slug, *args, **kwargs):
+    def retrieve(self, request, *args, **kwargs):
         post = self.get_object()
-        serializer = self.get_serializer(post)
-        # record the post view
         ip_address = get_client_ip(request)
-        # check if the post view already exists for this IP address
-        if not post.view_records.filter(ip_address=ip_address).exists():
-            post.view_records.create(ip_address=ip_address)
-            # increment the view count
-        post.view_count += 1
-        post.save(update_fields=['view_count'])
-        # return the serialized data
+
+        post.increment_views(ip_address)
+
+        serializer = self.get_serializer(post)
         return Response(serializer.data)
-
-    def put(self, request, slug, *args, **kwargs):
-        post = self.get_object()
-        serializer = self.get_serializer(post, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def patch(self, request, slug, *args, **kwargs):
-        post = self.get_object()
-        serializer = self.get_serializer(post, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AuthorPostsAPIView(generics.ListAPIView):
