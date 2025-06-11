@@ -57,10 +57,6 @@ class RegistrationApiView(generics.GenericAPIView):
                 "email": email,
                 "message": "Account created successfully, please check your email to activate your account."
             }
-
-            user_obj = get_object_or_404(User, email=email)
-            send_activation_email(user_obj, email)
-
             return Response(data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -244,7 +240,6 @@ class FollowingListView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-
 
 
 # bookmarks

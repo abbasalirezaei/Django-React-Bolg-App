@@ -2,16 +2,16 @@ version: '3.8'
 
 services:
   redis:
-    container_name: redis-blog-react
+    container_name: redis
     image: redis:alpine
     restart: always
     ports:
       - "6379:6379"
     command: redis-server --save 60 1 --loglevel warning
 
+
   backend:
     build: ./backend
-    container_name: backend-blog-react
     volumes:
       - ./backend:/app
     ports:
@@ -19,9 +19,9 @@ services:
     environment:
       - DEBUG=True
     command: python manage.py runserver 0.0.0.0:8000
-    depends_on: 
+    depends_on:
       - redis
-
+ 
   worker:
     build: ./backend
     command: celery -A core worker --loglevel=info
@@ -30,6 +30,8 @@ services:
       - backend
     volumes:
       - ./backend:/app
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
 
   frontend:
     build:
