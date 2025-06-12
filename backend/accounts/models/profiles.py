@@ -11,6 +11,8 @@ class Profile(models.Model):
     image = models.ImageField(
         upload_to='profile_images/', null=True, blank=True)
     
+    is_premium = models.BooleanField(default=False)
+    premium_expiry = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):

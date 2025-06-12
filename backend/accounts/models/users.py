@@ -40,6 +40,7 @@ class User(AbstractUser):
     username = None  # Remove default username
     email = models.EmailField(unique=True)
 
+
     verified = models.BooleanField(default=False)
     is_online = models.BooleanField(default=False)
     USERNAME_FIELD = 'email'

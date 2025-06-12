@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 # django imports
 from django.shortcuts import get_object_or_404
@@ -12,9 +12,13 @@ from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 
 
+from datetime import timedelta
+from django.utils import timezone
+
+
 # local imports
 from ..serializers.post_serializers import (PostSerializer,)
-from ..permissions import IsAuthorOrReadOnly
+from ..permissions import IsAuthorOrReadOnly, WeeklyPostLimit
 
 from posts.api.utils import get_client_ip
 from posts.models import (Post, PostBookmark)
@@ -27,10 +31,8 @@ User = get_user_model()
 class PostListAPIView(generics.ListCreateAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.filter(status=True)
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthorOrReadOnly, WeeklyPostLimit]
     filter_backends = [SearchFilter]
-    # ordering_fields = ['created_at', 'updated_at']
-    # filterset_fields = ['categories', 'tags']
     search_fields = ['title', 'description']
 
     def perform_create(self, serializer):
