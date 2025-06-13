@@ -18,7 +18,7 @@ from django.utils import timezone
 
 # local imports
 from ..serializers.post_serializers import (PostSerializer,)
-from ..permissions import IsAuthorOrReadOnly, WeeklyPostLimit
+from ..permissions import IsAuthorOrReadOnly, WeeklyPostLimit, WeeklyPostBookmarkLimit
 
 from posts.api.utils import get_client_ip
 from posts.models import (Post, PostBookmark)
@@ -91,7 +91,7 @@ class FeedAPIView(generics.ListAPIView):
 
 # make a bookmark for a post
 class TogglePostBookmarkAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, WeeklyPostBookmarkLimit]
 
     def post(self, request, slug):
         post = get_object_or_404(Post, slug=slug)

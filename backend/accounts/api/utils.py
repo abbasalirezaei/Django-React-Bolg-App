@@ -4,6 +4,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.core.mail import send_mail
+from django.utils import timezone
 
 import threading
 import logging
@@ -50,3 +51,15 @@ def send_activation_email(user, email):
     # Send email asynchronously using threading
     EmailThread(msg).start()
 
+
+
+def is_premium_user(user):
+    """
+    Check if the user has an active premium status.
+    Works only if user has a related profile with is_premium and premium_expiry.
+    """
+    profile = getattr(user, "profile", None)
+    if not profile:
+        return False
+
+    return profile.is_premium and (not profile.premium_expiry or profile.premium_expiry > timezone.now())

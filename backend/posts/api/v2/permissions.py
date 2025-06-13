@@ -6,6 +6,7 @@ from django.utils import timezone
 
 
 from posts.models import Post, PostBookmark
+from accounts.api.utils import is_premium_user
 
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
@@ -45,15 +46,15 @@ class WeeklyPostLimit(permissions.BasePermission):
             raise PermissionDenied(
                 "Only users with author role can create posts.")
 
-        # Check if the user has a profile
-        try:
-            profile = user.profile
-        except AttributeError:
-            raise PermissionDenied("User profile not found.")
-        # If the user is a premium member, allow unlimited creation of posts
-        if profile.is_premium and (not profile.premium_expiry or profile.premium_expiry > timezone.now()):
+        """
+        Check if the user is a premium user can create unlimited posts
+        """
+        if is_premium_user(user):
             return True
 
+        """
+            If the user is not a premium:
+        """
         # Calculate the date one week ago from now
         one_week_ago = timezone.now() - timedelta(days=7)
 
@@ -81,14 +82,11 @@ class WeeklyPostBookmarkLimit(permissions.BasePermission):
         if not user.is_authenticated:
             return False
 
-        profile = getattr(user, "profile", None)
-        if not profile:
-            return False  # or optionally: self.message = "User profile not found."
-
-        # Premium users have no limit
-        if profile.is_premium and (not profile.premium_expiry or profile.premium_expiry > timezone.now()):
+    
+        if is_premium_user(user):
+            # Premium users can bookmark unlimited posts
             return True
-
+        
         # Limit for regular users
         one_week_ago = timezone.now() - timedelta(days=7)
         weekly_bookmark_count = PostBookmark.objects.filter(

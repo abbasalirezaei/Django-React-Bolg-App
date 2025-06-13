@@ -32,7 +32,16 @@ services:
       - ./backend:/app
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
-
+  beat:
+    build: ./backend
+    command: celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    depends_on:
+      - redis
+      - backend
+    volumes:
+      - ./backend:/app
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
   frontend:
     build:
       context: ./frontEnd
