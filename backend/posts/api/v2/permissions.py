@@ -5,7 +5,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 
-from posts.models import Post
+from posts.models import Post, PostBookmark
 
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
@@ -53,10 +53,10 @@ class WeeklyPostLimit(permissions.BasePermission):
         # If the user is a premium member, allow unlimited creation of posts
         if profile.is_premium and (not profile.premium_expiry or profile.premium_expiry > timezone.now()):
             return True
-        
+
         # Calculate the date one week ago from now
         one_week_ago = timezone.now() - timedelta(days=7)
-        
+
         # Check the number of posts created by the user in the last week
         weekly_post_count = Post.objects.filter(
             author=user, created_at__gte=one_week_ago, status=True
@@ -67,3 +67,33 @@ class WeeklyPostLimit(permissions.BasePermission):
             raise PermissionDenied(self.message)
 
         return weekly_post_count < 5
+
+
+class WeeklyPostBookmarkLimit(permissions.BasePermission):
+    message = "You can only bookmark up to 10 posts per week. Upgrade to premium to bookmark more."
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        if request.method != "POST":
+            return True
+
+        if not user.is_authenticated:
+            return False
+
+        profile = getattr(user, "profile", None)
+        if not profile:
+            return False  # or optionally: self.message = "User profile not found."
+
+        # Premium users have no limit
+        if profile.is_premium and (not profile.premium_expiry or profile.premium_expiry > timezone.now()):
+            return True
+
+        # Limit for regular users
+        one_week_ago = timezone.now() - timedelta(days=7)
+        weekly_bookmark_count = PostBookmark.objects.filter(
+            user=user,
+            created_at__gte=one_week_ago
+        ).count()
+
+        return weekly_bookmark_count < 10
