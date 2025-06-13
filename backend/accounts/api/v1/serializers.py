@@ -171,26 +171,35 @@ class ProfileSerializer(serializers.ModelSerializer):
         days_left = (expiry - timezone.now()).days if expiry else None
 
         # remaining_posts default value
-        remaining_posts = 0
-        # if user is not an author or is a premium user, set unlimited posts
-        if obj.user.role == "author" and not is_premium:
-            one_week_ago = timezone.now() - timedelta(days=7)
-            weekly_post_count = obj.user.posts.filter(
-                status=True,
-                created_at__gte=one_week_ago
-            ).count()
-            remaining_posts = max(0, 5 - weekly_post_count)
+        remaining_posts = None
 
-        message = (
-            f"{days_left} days left" if is_premium else
-            "Not a premium user. You can only write 5 blog posts per week."
-        )
-        # result dictionary 
+        # if user is not an author
+        if obj.user.role == "author":
+            if is_premium:
+                remaining_posts = "unlimited"
+            else:
+                one_week_ago = timezone.now() - timedelta(days=7)
+                weekly_post_count = obj.user.posts.filter(
+                    status=True,
+                    created_at__gte=one_week_ago
+                ).count()
+                remaining_posts = max(0, 5 - weekly_post_count)
+        # If the user is not author
+        message = ""
+        if is_premium:
+            message = f"Premium active — expires in {days_left} days." if days_left is not None else "Premium active."
+        else:
+            if obj.user.role == "author":
+                message = "Not premium. You can only write 5 blog posts per week."
+            else:
+                message = "Not premium. Upgrade for more features."
+
+        # result dictionary
         return {
             "active": is_premium,
             "expiry": expiry,
             "days_left": days_left,
-            "remaining_weekly_posts": "unlimited" if is_premium else remaining_posts,
+            "remaining_weekly_posts": remaining_posts,
             "message": message
         }
 

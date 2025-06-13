@@ -42,12 +42,14 @@ def deactivate_expired_premium_users():
         is_premium=True,
         premium_expiry__lt=now
     )
-    
     for profile in expired_profiles:
         profile.is_premium = False
         profile.premium_expiry = None
         profile.save()
-        # sending email
+
+        """
+             sending email
+        """
         context={
             "user":profile.user.email
         }
@@ -62,7 +64,3 @@ def deactivate_expired_premium_users():
             msg.send()
         except Exception as e:
             print(f"Failed to send email to {to_email}: {e}")
-
-
-        # Optionally, send an email notification to the user
-        # send_premium_expiry_email(profile.user.email)
