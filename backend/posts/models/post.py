@@ -25,7 +25,7 @@ class Post(models.Model):
     short_description = models.CharField(_("Short description"), max_length=300, blank=True)
     reading_time = models.PositiveIntegerField(_("Reading time (minutes)"), default=0)
     img = models.ImageField(_("Post image"), upload_to="blog_image/", blank=True, null=True)
-    status = models.BooleanField(_("Published status"), default=False)
+    status = models.BooleanField(_("Published status"), default=False, help_text="Mark post as featured (premium-only access)")
     is_featured = models.BooleanField(_("Featured"), default=False)
     view_count = models.PositiveIntegerField(_("View Count"), default=0)
 

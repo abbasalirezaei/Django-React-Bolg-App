@@ -4,6 +4,7 @@ from posts.models import (
     Post, Tag,  Category,  PostBookmark
 )
 
+from django.utils import timezone
 from accounts.api.v1.serializers import ProfileSerializer
 from ..serializers.comment_serializers import PostCommentSerializer
 
@@ -23,6 +24,8 @@ list of serializers for the posts app:
 """
 
 # tag serializer
+
+
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
@@ -31,12 +34,16 @@ class TagSerializer(serializers.ModelSerializer):
         ]
 
 # category serializer
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name']
 
 # post serializer
+
+
 class PostSerializer(serializers.ModelSerializer):
     comments = PostCommentSerializer(many=True, read_only=True)
     author = ProfileSerializer(source='author.profile', read_only=True)
@@ -44,7 +51,7 @@ class PostSerializer(serializers.ModelSerializer):
     views = serializers.IntegerField(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     categories = CategorySerializer(many=True, read_only=True)
-
+    description=serializers.SerializerMethodField()
     class Meta:
         model = Post
         fields = [
@@ -67,6 +74,47 @@ class PostSerializer(serializers.ModelSerializer):
     def get_likes(self, obj):
         return obj.likes.count()
 
+    def get_description(self, obj):
+        request = self.context.get('request')
+        user = request.user if request else None
+
+        def _summarize(text, max_chars=300):
+            return text.split("\n")[0][:max_chars] + "..." if text else ""
+
+        """
+        First: post is featured or not
+        If post is featured:
+            Second: if user is authenticated or not
+            Third:  if user is the author of the post or not
+            Fourth: if user is premium or not
+            Fifth:  if user is not premium, show the summary of the post
+        """
+
+        # if post is not featured, show full description
+        if not obj.is_featured:
+            return obj.description
+
+        # if user is not authenticated, show summary of the post
+        if not user or not user.is_authenticated:
+            return _summarize(obj.description)
+
+        # if user is the author of the post, always return full description
+        if obj.author == user:
+            return obj.description
+
+        # check the user's profile for premium status(no matter if reader or author)
+        profile = getattr(user, "profile", None)
+        is_premium = (
+            profile and profile.is_premium and
+            (profile.premium_expiry is None or profile.premium_expiry > timezone.now())
+        )
+
+        # if user is premium, return full description
+        if is_premium:
+            return obj.description
+
+        # otherwise show the summary the post
+        return _summarize(obj.description)
 
 # post bookmark serializer
 class PostBookmarkSerializer(serializers.ModelSerializer):
@@ -80,4 +128,3 @@ class PostBookmarkSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         return ProfileSerializer(obj.user.profile, context=self.context).data
-    
