@@ -11,6 +11,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 
 
+from django.utils import timezone
+from datetime import timedelta
 # locals import
 from ...models import Profile, Follow
 from django.contrib.auth import get_user_model
@@ -136,6 +138,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     followers = serializers.SerializerMethodField()
     following = serializers.SerializerMethodField()
 
+    premium_status = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
         fields = [
@@ -149,11 +153,46 @@ class ProfileSerializer(serializers.ModelSerializer):
             "user_comments",
             "followers",
             "following",
-
+            "premium_status",
             "created_at",
             "updated_at",
         ]
         read_only_fields = ["slug", "created_at", "updated_at"]
+
+    def get_is_premium(self, obj):
+        """Check if user's premium is active"""
+        return obj.is_premium and (obj.premium_expiry is None or obj.premium_expiry > timezone.now())
+
+    def get_premium_status(self, obj):
+        """Return premium status details"""
+
+        is_premium = self.get_is_premium(obj)
+        expiry = obj.premium_expiry if is_premium else None
+        days_left = (expiry - timezone.now()).days if expiry else None
+
+        # remaining_posts default value
+        remaining_posts = 0
+        # if user is not an author or is a premium user, set unlimited posts
+        if obj.user.role == "author" and not is_premium:
+            one_week_ago = timezone.now() - timedelta(days=7)
+            weekly_post_count = obj.user.posts.filter(
+                status=True,
+                created_at__gte=one_week_ago
+            ).count()
+            remaining_posts = max(0, 5 - weekly_post_count)
+
+        message = (
+            f"{days_left} days left" if is_premium else
+            "Not a premium user. You can only write 5 blog posts per week."
+        )
+        # result dictionary 
+        return {
+            "active": is_premium,
+            "expiry": expiry,
+            "days_left": days_left,
+            "remaining_weekly_posts": "unlimited" if is_premium else remaining_posts,
+            "message": message
+        }
 
     def get_user_comments(self, obj):
         """Retrieve all comments made by the user"""
@@ -246,5 +285,3 @@ class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = ['from_user', 'to_user', 'created_at']
-
-
