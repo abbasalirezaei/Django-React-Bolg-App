@@ -30,7 +30,7 @@ User = get_user_model()
 
 class PostListAPIView(generics.ListCreateAPIView):
     serializer_class = PostSerializer
-    queryset = Post.objects.filter(status=True)
+    queryset = Post.objects.filter(status=Post.PostStatus.PUBLISHED)
     permission_classes = [
         IsAuthorOrReadOnly,
         WeeklyPostLimit
@@ -39,11 +39,11 @@ class PostListAPIView(generics.ListCreateAPIView):
     search_fields = ['title', 'description']
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user, status=False)
+        serializer.save(author=self.request.user)
 
 
 class PostDetailAPIView(generics.RetrieveUpdateAPIView):
-    queryset = Post.objects.filter(status=True)
+    queryset = Post.objects.filter(status=Post.PostStatus.PUBLISHED)
     serializer_class = PostSerializer
     permission_classes = [IsAuthorOrReadOnly,]
     lookup_field = "slug"
@@ -84,10 +84,10 @@ class FeedAPIView(generics.ListAPIView):
         # if the user is not following anyone, return no posts
         if not list_of_following:
             return Post.objects.none()
-        # filter posts from those users that are published (status=True)
+        # filter posts from those users that are published 
         qs = Post.objects.filter(
             author__in=list_of_following,
-            status=True
+            status=Post.PostStatus.PUBLISHED
         ).order_by('-created_at').select_related("author").prefetch_related("tags", 'categories')
         return qs
 

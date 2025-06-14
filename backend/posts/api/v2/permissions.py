@@ -62,7 +62,7 @@ class WeeklyPostLimit(permissions.BasePermission):
 
         # Count number of posts in the past 7 days
         weekly_post_count = Post.objects.filter(
-            author=user, created_at__gte=one_week_ago, status=True
+            author=user, created_at__gte=one_week_ago, status=Post.PostStatus.PUBLISHED
         ).count()
 
         # If the count is 5 or more, deny permission

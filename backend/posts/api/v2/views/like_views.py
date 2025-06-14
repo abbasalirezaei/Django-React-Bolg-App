@@ -33,7 +33,7 @@ class PostLikeAPIView(APIView):
 
     @swagger_auto_schema(tags=['posts-likes'])
     def post(self, request, slug):
-        post = get_object_or_404(Post, slug=slug, status=True)
+        post = get_object_or_404(Post, slug=slug, status=Post.PostStatus.PUBLISHED)
         like, created = PostLike.objects.get_or_create(
             post=post, user=request.user)
 
@@ -44,7 +44,7 @@ class PostLikeAPIView(APIView):
 
     @swagger_auto_schema(tags=['posts-likes'])
     def delete(self, request, slug):
-        post = get_object_or_404(Post, slug=slug, status=True)
+        post = get_object_or_404(Post, slug=slug, status=Post.PostStatus.PUBLISHED)
         try:
             like = PostLike.objects.get(post=post, user=request.user)
             like.delete()

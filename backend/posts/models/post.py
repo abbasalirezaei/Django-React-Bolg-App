@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
-
+from django.core.exceptions import ValidationError
 
 from django.utils import timezone
 from .category import Category
@@ -67,6 +67,7 @@ class Post(models.Model):
         return f"{self.title} by {self.author.email if self.author else 'Unknown'}"
 
     def save(self, *args, **kwargs):
+        self.full_clean()
         if not self.slug:
             self.slug = slugify(self.title)
 
@@ -76,6 +77,13 @@ class Post(models.Model):
         self.reading_time = max(
             1, len(self.description.split()) // 200)  # avg 200 wpm
         super().save(*args, **kwargs)
+
+    def clean(self):
+        super().clean()
+        if self.status == self.PostStatus.SCHEDULED and not self.publish_time:
+            raise ValidationError({
+                'publish_time': "Publish time must be set if the status is 'scheduled'."
+            })
 
     def increment_views(self, ip_address):
         if not self.view_records.filter(ip_address=ip_address).exists():

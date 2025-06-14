@@ -25,11 +25,11 @@ class CommentListCreateAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         post_slug = self.kwargs.get('slug')
-        post = get_object_or_404(Post, slug=post_slug, status=True)
+        post = get_object_or_404(Post, slug=post_slug, status=Post.PostStatus.PUBLISHED)
         return PostComment.objects.filter(post=post).order_by('-created_at')
 
     def perform_create(self, serializer):
-        post = get_object_or_404(Post, slug=self.kwargs['slug'], status=True)
+        post = get_object_or_404(Post, slug=self.kwargs['slug'], status=Post.PostStatus.PUBLISHED)
         serializer.save(post=post, user=self.request.user)
 
 
@@ -41,7 +41,7 @@ class CommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         return PostComment.objects.all()
 
     def get_object(self):
-        post = get_object_or_404(Post, slug=self.kwargs["slug"], status=True)
+        post = get_object_or_404(Post, slug=self.kwargs["slug"], status=Post.PostStatus.PUBLISHED)
         return get_object_or_404(
             self.get_queryset(), id=self.kwargs["comment_id"], post=post
         )

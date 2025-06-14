@@ -7,6 +7,7 @@ class Notification(models.Model):
         ('COMMENT', 'Comment'),
         ('COMMENT_LIKE', 'Comment Like'),
         ('LIKE', 'Like'),
+        ('PUBLISH', 'Post Published'),
     )
 
     notification_type = models.CharField(

@@ -15,6 +15,7 @@ from django.utils import timezone
 from datetime import timedelta
 # locals import
 from ...models import Profile, Follow
+from posts.models import Post
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -180,7 +181,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             else:
                 one_week_ago = timezone.now() - timedelta(days=7)
                 weekly_post_count = obj.user.posts.filter(
-                    status=True,
+                    status=Post.PostStatus.PUBLISHED,
                     created_at__gte=one_week_ago
                 ).count()
                 remaining_posts = max(0, 5 - weekly_post_count)
@@ -247,7 +248,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_user_likes(self, obj):
         """Retrieve all likes made by the user"""
-        return obj.user.likes.values("post__title")
+        return obj.user.likes.values("post__title")[:10]
 
     def get_user_posts(self, obj):
         """Retrieve all posts created by the user"""

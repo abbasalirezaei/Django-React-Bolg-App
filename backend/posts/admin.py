@@ -64,12 +64,14 @@ class PostCommentInline(admin.TabularInline):
 
 
 # --- Post Admin ---
+
+
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin, ImagePreviewMixin):
     list_display = (
-        "title", "author_email", "status", "is_featured",
-        "created_at", "updated_at", "reading_time",
-        "view_count", "image_tag",
+        "title", "author_email", "status" ,  "image_tag",  "is_featured",
+        "created_at", "publish_time", "reading_time",
+        "view_count",
     )
     search_fields = (
         "title", "description", "author__email",
@@ -83,7 +85,7 @@ class PostAdmin(admin.ModelAdmin, ImagePreviewMixin):
     prepopulated_fields = {"slug": ("title",)}
 
     fieldsets = (
-        (None, {"fields": ("title", "slug", "author", "status", "is_featured", "img")}),
+        (None, {"fields": ("title", "slug", "author", "status", "publish_time", "is_featured", "img")}),
         ("Content", {"fields": ("description", "short_description", "reading_time")}),
         ("Relations", {"fields": ("categories", "tags")}),
         ("Timestamps & Stats", {
@@ -91,8 +93,8 @@ class PostAdmin(admin.ModelAdmin, ImagePreviewMixin):
             "classes": ("collapse",),
         }),
     )
-
     readonly_fields = ("created_at", "updated_at", "view_count", "image_tag")
+
     inlines = [PostViewInline, PostLikeInline, PostCommentInline]
 
     def author_email(self, obj):
@@ -104,6 +106,8 @@ class PostAdmin(admin.ModelAdmin, ImagePreviewMixin):
         if obj:
             ro_fields.append("reading_time")
         return ro_fields
+
+
 
 
 @admin.register(PostComment)

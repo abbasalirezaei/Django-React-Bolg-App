@@ -51,7 +51,10 @@ class PostSerializer(serializers.ModelSerializer):
     views = serializers.IntegerField(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     categories = CategorySerializer(many=True, read_only=True)
-    description=serializers.SerializerMethodField()
+    description_display = serializers.SerializerMethodField(read_only=True)
+    description = serializers.CharField(write_only=True)
+    status = serializers.ChoiceField(choices=Post.PostStatus.choices)
+
     class Meta:
         model = Post
         fields = [
@@ -59,14 +62,16 @@ class PostSerializer(serializers.ModelSerializer):
             "title",
             "slug", "author",
             "categories", "tags",
-            "description", "short_description",
+            "description",
+            "description_display",
+            "short_description",
             "reading_time", "img",
             "status", "is_featured",
             "created_at", "updated_at",
-            "comments", 'likes', 'views'
+            "comments", 'likes', 'views', "publish_time",
         ]
         read_only_fields = [
-            "slug", "author",
+            "slug", "author", "short_description",
             "reading_time", "updated_at",
             "created_at", 'status', 'likes'
         ]
@@ -74,7 +79,7 @@ class PostSerializer(serializers.ModelSerializer):
     def get_likes(self, obj):
         return obj.likes.count()
 
-    def get_description(self, obj):
+    def get_description_display(self, obj):
         request = self.context.get('request')
         user = request.user if request else None
 
@@ -116,7 +121,37 @@ class PostSerializer(serializers.ModelSerializer):
         # otherwise show the summary the post
         return _summarize(obj.description)
 
+    def validate(self, data):
+        status = data.get('status')
+        publish_time = data.get('publish_time')
+
+        # If we're updating and there's existing data
+        if self.instance:
+            status = status or self.instance.status
+            publish_time = publish_time or self.instance.publish_time
+
+        # If the post is scheduled but doesn't have a publish time
+        if status == Post.PostStatus.SCHEDULED and not publish_time:
+            raise serializers.ValidationError({
+                'publish_time': "You must set a publish time when the post is scheduled."
+            })
+
+        # If the post is not scheduled, it shouldn't have a publish_time
+        if status != Post.PostStatus.SCHEDULED:
+            data['publish_time'] = None
+
+        return data
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+
+  
+        rep['description'] = rep.pop('description_display', '')
+
+        return rep
+
 # post bookmark serializer
+
+
 class PostBookmarkSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
     post = serializers.PrimaryKeyRelatedField(read_only=True)
