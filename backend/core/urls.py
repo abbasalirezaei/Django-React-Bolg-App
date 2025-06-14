@@ -28,6 +28,7 @@ urlpatterns = [
 
     path('posts/', include('posts.urls')),
     path('accounts/', include('accounts.urls')),
+    path('advertisements/', include('advertisements.urls')),
     path('', include('notification.urls', namespace='notifications')),
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
