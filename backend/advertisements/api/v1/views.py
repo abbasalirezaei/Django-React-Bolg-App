@@ -7,8 +7,10 @@ from django.db.models import F
 
 class AdvertisementListView(APIView):
     def get(self, request):
-        # Get active ads, ordered by priority and creation date
-        ads = Advertisement.objects.filter(active=True).order_by('-display_priority', '-created_at')
-        serializer = AdvertisementSerializer(ads, many=True)
+        ads = Advertisement.objects.filter(active=True)
+        if request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.is_premium:
+            ads=ads.filter(show_to_premium=True)
 
+        ads = ads.order_by('-display_priority', '-created_at')
+        serializer = AdvertisementSerializer(ads, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

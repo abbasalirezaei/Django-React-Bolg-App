@@ -9,6 +9,7 @@ class Advertisement(models.Model):
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(blank=True, null=True, help_text="Expiration date of the advertisement")
     display_priority = models.PositiveIntegerField(default=0)
+    
     # If you want to show it only to non-premium users
     show_to_premium = models.BooleanField(default=True, help_text="Should this ad be shown to premium users?")
 
