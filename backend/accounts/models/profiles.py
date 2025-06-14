@@ -3,6 +3,7 @@ from django.utils.text import slugify
 
 
 class Profile(models.Model):
+
     slug = models.SlugField(unique=True)
     user = models.OneToOneField(
         'accounts.User', on_delete=models.CASCADE, related_name="profile")

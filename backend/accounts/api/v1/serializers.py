@@ -173,7 +173,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         # remaining_posts default value
         remaining_posts = None
 
-        # if user is not an author
+        # if user is an author
         if obj.user.role == "author":
             if is_premium:
                 remaining_posts = "unlimited"

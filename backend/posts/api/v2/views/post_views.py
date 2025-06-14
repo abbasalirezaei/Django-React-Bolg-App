@@ -31,7 +31,10 @@ User = get_user_model()
 class PostListAPIView(generics.ListCreateAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.filter(status=True)
-    permission_classes = [IsAuthorOrReadOnly, WeeklyPostLimit]
+    permission_classes = [
+        IsAuthorOrReadOnly,
+        WeeklyPostLimit
+    ]
     filter_backends = [SearchFilter]
     search_fields = ['title', 'description']
 

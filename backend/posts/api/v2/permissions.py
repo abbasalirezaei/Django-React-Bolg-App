@@ -11,8 +11,8 @@ from accounts.api.utils import is_premium_user
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
     """
-    Allow safe methods for everyone,
-    but restrict write permissions to users with role 'author'.
+    Allow safe methods (GET, HEAD, OPTIONS) for everyone.
+    Only authenticated users with role 'author' can modify.
     """
 
     def has_permission(self, request, view):
@@ -31,24 +31,26 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
 
 
 class WeeklyPostLimit(permissions.BasePermission):
+    """
+    Restrict non-premium authors to 5 posts per week.
+    """
     message = "You can only publish up to 5 posts per week. Upgrade to premium to post more."
 
     def has_permission(self, request, view):
         user = request.user
 
         if request.method != "POST":
-            return True
+            return True  # Only applies to creating posts
 
         if not user.is_authenticated:
             return False
 
         if getattr(user, 'role', None) != 'author':
             raise PermissionDenied(
-                "Only users with author role can create posts.")
+                "Only users with author role can create posts."
+            )
 
-        """
-        Check if the user is a premium user can create unlimited posts
-        """
+        # Premium users can post unlimited
         if is_premium_user(user):
             return True
 
@@ -58,7 +60,7 @@ class WeeklyPostLimit(permissions.BasePermission):
         # Calculate the date one week ago from now
         one_week_ago = timezone.now() - timedelta(days=7)
 
-        # Check the number of posts created by the user in the last week
+        # Count number of posts in the past 7 days
         weekly_post_count = Post.objects.filter(
             author=user, created_at__gte=one_week_ago, status=True
         ).count()
@@ -82,11 +84,10 @@ class WeeklyPostBookmarkLimit(permissions.BasePermission):
         if not user.is_authenticated:
             return False
 
-    
         if is_premium_user(user):
             # Premium users can bookmark unlimited posts
             return True
-        
+
         # Limit for regular users
         one_week_ago = timezone.now() - timedelta(days=7)
         weekly_bookmark_count = PostBookmark.objects.filter(

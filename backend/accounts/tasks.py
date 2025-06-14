@@ -34,33 +34,46 @@ def send_activation_email_task(user_id, email):
     msg.attach_alternative(html_content, "text/html")
     msg.send()
 
+
 @shared_task
 def deactivate_expired_premium_users():
-    print("this task is run in each one minute")
-    now=timezone.now()
+    """
+    Deactivates premium status for users whose premium membership has expired,
+    and sends them an email notification.
+    This task is intended to run periodically (e.g., every minute).
+    """
+
+    now = timezone.now()
+
+    # Find all expired premium profiles
     expired_profiles = Profile.objects.filter(
         is_premium=True,
         premium_expiry__lt=now
     )
+
     for profile in expired_profiles:
+        # Update profile
         profile.is_premium = False
         profile.premium_expiry = None
         profile.save()
 
-        """
-             sending email
-        """
-        context={
-            "user":profile.user.email
-        }
-        subject = "Expired premium Account"
+        # Email content setup
+        subject = "Your Premium Account Has Expired"
         from_email = settings.EMAIL_HOST_USER
-        text_content = f"Your account is not premium anymore"
+        to_email = profile.user.email
+
+        context = {
+            "user": to_email
+        }
+
+        text_content = "Your account is no longer premium."
         html_content = render_to_string("email/expired_profiles.html", context)
-        to_email=profile.user.email
-        msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
-        msg.attach_alternative(html_content, "text/html")
+
+        # Send email
         try:
+            msg = EmailMultiAlternatives(
+                subject, text_content, from_email, [to_email])
+            msg.attach_alternative(html_content, "text/html")
             msg.send()
         except Exception as e:
-            print(f"Failed to send email to {to_email}: {e}")
+            print(f"❌ Failed to send email to {to_email}: {e}")
