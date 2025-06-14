@@ -89,7 +89,7 @@ class PostAdmin(admin.ModelAdmin, ImagePreviewMixin):
         ("Content", {"fields": ("description", "short_description", "reading_time")}),
         ("Relations", {"fields": ("categories", "tags")}),
         ("Timestamps & Stats", {
-            "fields": ("created_at", "updated_at", "view_count", "image_tag"),
+            "fields": ("created_at", "updated_at","published_at", "view_count", "image_tag"),
             "classes": ("collapse",),
         }),
     )
