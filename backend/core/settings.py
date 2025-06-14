@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'posts.apps.PostsConfig',
     'accounts.apps.AccountsConfig',
     'notification.apps.NotificationConfig',
+    "advertisements",
 
 
     # Third party
