@@ -185,7 +185,8 @@ class FollowUserView(APIView):
             user_to_follow = User.objects.get(id=user_id)
             if user_to_follow == request.user:
                 return Response({"error": "You cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
-
+            if not user_to_follow.is_active:
+                return Response({"error": "User is not active yet."}, status=status.HTTP_400_BAD_REQUEST)   
             follow, created = Follow.objects.get_or_create(
                 from_user=request.user, to_user=user_to_follow)
             if not created:
@@ -214,7 +215,7 @@ class UnfollowUserView(APIView):
                 return Response({
                     "message": f"You have unfollowed {user_to_unfollow.email}",
                     "user": serializer.data
-                }, status=status.HTTP_200_OK)
+                }, status=status.HTTP_204_NO_CONTENT)
             return Response({"error": "You are not following this user."}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
