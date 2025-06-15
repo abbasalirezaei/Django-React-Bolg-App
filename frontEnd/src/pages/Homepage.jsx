@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -6,58 +5,45 @@ import PostCard from '../components/PostCard';
 import Sidebar from '../components/Sidebar';
 import { ArrowRight, BookOpen, Users, Star, MessageCircle, Eye, Facebook, Twitter, Instagram, Mail } from 'lucide-react';
 import { postsAPI } from '../api/api';
+
 const Homepage = () => {
     const { t } = useLanguage();
     const [topViewedPosts, setTopViewedPosts] = useState([]);
     const [topCommentedPosts, setTopCommentedPosts] = useState([]);
+    const [error, setError] = useState(null); // اضافه کردن error state
 
     const fetchTopViewedPosts = async () => {
         try {
-
             const response = await postsAPI.getTopViewedPosts();
-
             console.log(response.data);
-
             setTopViewedPosts(response.data);
-
         } catch (err) {
             setError(err.message || 'Error fetching posts');
-
         }
     };
+
     const fetchCommentedPosts = async () => {
         try {
-
             const response = await postsAPI.getTopCommentedPosts();
-
             console.log(response.data);
-
             setTopCommentedPosts(response.data);
-
         } catch (err) {
             setError(err.message || 'Error fetching posts');
-
         }
     };
-
 
     useEffect(() => {
         fetchTopViewedPosts();
         fetchCommentedPosts();
-
     }, []);
-
-
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="container mx-auto px-4 py-8">
+                <div className="flex flex-col lg:flex-row gap-8">
                     {/* Main Content */}
-                    <div className="lg:col-span-3">
-                        {/* Hero Section */}
-
-                        {/* Statistics Section */}
+                    <div className="lg:w-3/4">
+                        {error && <div className="text-red-500 mb-4">{error}</div>}
 
                         {/* Most Commented Posts */}
                         <section className="mb-12">
@@ -74,7 +60,6 @@ const Homepage = () => {
                                     <ArrowRight className="w-4 h-4 ml-2" />
                                 </Link>
                             </div>
-
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 {topCommentedPosts.map((post) => (
                                     <PostCard key={post.id} post={post} />
@@ -97,7 +82,6 @@ const Homepage = () => {
                                     <ArrowRight className="w-4 h-4 ml-2" />
                                 </Link>
                             </div>
-
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 {topViewedPosts.map((post) => (
                                     <PostCard key={post.id} post={post} />
@@ -131,8 +115,10 @@ const Homepage = () => {
                     </div>
 
                     {/* Sidebar */}
-                    <div className="lg:col-span-1">
-                        <Sidebar />
+                    <div className="lg:w-1/4">
+                        <div className="sticky top-4">
+                            <Sidebar />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -141,7 +127,6 @@ const Homepage = () => {
             <footer className="bg-gray-900 text-white py-12 mt-16">
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                        {/* Brand */}
                         <div className="md:col-span-1">
                             <div className="flex items-center space-x-2 mb-4">
                                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
@@ -167,8 +152,6 @@ const Homepage = () => {
                                 </a>
                             </div>
                         </div>
-
-                        {/* Quick Links */}
                         <div>
                             <h3 className="font-semibold mb-4">Quick Links</h3>
                             <ul className="space-y-2">
@@ -178,8 +161,6 @@ const Homepage = () => {
                                 <li><Link to="/contact" className="text-gray-400 hover:text-white transition-colors">Contact</Link></li>
                             </ul>
                         </div>
-
-                        {/* Categories */}
                         <div>
                             <h3 className="font-semibold mb-4">Categories</h3>
                             <ul className="space-y-2">
@@ -189,8 +170,6 @@ const Homepage = () => {
                                 <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Business</a></li>
                             </ul>
                         </div>
-
-                        {/* Support */}
                         <div>
                             <h3 className="font-semibold mb-4">Support</h3>
                             <ul className="space-y-2">
@@ -201,7 +180,6 @@ const Homepage = () => {
                             </ul>
                         </div>
                     </div>
-
                     <div className="border-t border-gray-800 mt-8 pt-8 text-center">
                         <p className="text-gray-400">
                             © 2024 BlogSpace. All rights reserved. Made with ❤️ for the writing community.

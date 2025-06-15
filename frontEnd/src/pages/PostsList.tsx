@@ -39,7 +39,7 @@ const PostsList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [sortBy, setSortBy] = useState('latest');
-    const postsPerPage = 1;
+    const postsPerPage = 3;
     // Transform API data into desired format and retain only necessary fields
 
     const mapPostData = (post) => ({
