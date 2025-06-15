@@ -90,6 +90,7 @@ def test_user_can_unfollow_another_user(api_client, verified_active_user):
 
 @pytest.mark.django_db
 def test_user_can_not_follow_slef(api_client, verified_active_user):
+    """Test that a user cannot follow themselves."""
     from_user=verified_active_user
     to_user=verified_active_user
     # authenticate the client
@@ -106,4 +107,4 @@ def test_user_can_not_follow_slef(api_client, verified_active_user):
 
     # verify database state
     assert not Follow.objects.filter(from_user=from_user, to_user=to_user).exists()
-    
+

@@ -52,3 +52,10 @@ class Follow(models.Model):
 
     def __str__(self):
         return f"{self.from_user.email} follows {self.to_user.email}"
+
+    def save(self, *args, **kwargs):
+        if not self.from_user.is_active:
+            raise ValueError("User is not active")
+        if self.from_user == self.to_user:
+            raise ValueError("You cannot follow yourself")
+        super().save(*args, **kwargs)
