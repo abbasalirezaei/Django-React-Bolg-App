@@ -108,3 +108,22 @@ def test_user_can_not_follow_slef(api_client, verified_active_user):
     # verify database state
     assert not Follow.objects.filter(from_user=from_user, to_user=to_user).exists()
 
+@pytest.mark.django_db
+def test_user_cannot_follow_inactive_user(api_client, verified_active_user):
+    """Test that a user cannot follow an inactive user."""
+    from_user = verified_active_user
+    to_user = User.objects.create_user(
+        email="inactive@example.com",
+        password="StrongPass123",
+        verified=True,
+        is_active=False
+    )
+    
+    api_client.force_authenticate(user=from_user)
+    
+    url = reverse("follow:follow-user", kwargs={"user_id": to_user.id})
+    response = api_client.post(url)
+    
+    assert response.status_code == 400  # Bad Request
+    assert "User is not active yet.".lower() in response.data.get("error", "").lower()  # Adjust based on your error message
+    assert not Follow.objects.filter(from_user=from_user, to_user=to_user).exists()
