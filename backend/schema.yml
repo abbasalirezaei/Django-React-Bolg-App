@@ -1,0 +1,1398 @@
+openapi: 3.0.3
+info:
+  title: Blog Application
+  version: 1.0.0
+  description: Your project description
+paths:
+  /accounts/api/v1/activation/confirm/{token}/:
+    get:
+      operationId: accounts_api_v1_activation_confirm_retrieve
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /accounts/api/v1/activation/resend/:
+    post:
+      operationId: accounts_api_v1_activation_resend_create
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivationResend'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ActivationResend'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ActivationResend'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivationResend'
+          description: ''
+  /accounts/api/v1/changepassword/:
+    put:
+      operationId: accounts_api_v1_changepassword_update
+      description: An endpoint for changing password.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePassword'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChangePassword'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChangePassword'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangePassword'
+          description: ''
+  /accounts/api/v1/follow/{user_id}/:
+    post:
+      operationId: accounts_api_v1_follow_create
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /accounts/api/v1/followers/{user_id}/:
+    get:
+      operationId: accounts_api_v1_followers_retrieve
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /accounts/api/v1/following/{user_id}/:
+    get:
+      operationId: accounts_api_v1_following_retrieve
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /accounts/api/v1/jwt/token/create/:
+    post:
+      operationId: accounts_api_v1_jwt_token_create_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtain'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtain'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtain'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomTokenObtain'
+          description: ''
+  /accounts/api/v1/jwt/token/refresh/:
+    post:
+      operationId: accounts_api_v1_jwt_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /accounts/api/v1/jwt/token/verify/:
+    post:
+      operationId: accounts_api_v1_jwt_token_verify_create
+      description: |-
+        Takes a token and indicates if it is valid.  This view provides no
+        information about a token's fitness for a particular use.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerify'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenVerify'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenVerify'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenVerify'
+          description: ''
+  /accounts/api/v1/profile/:
+    get:
+      operationId: accounts_api_v1_profile_retrieve
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+    put:
+      operationId: accounts_api_v1_profile_update
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Profile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Profile'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+    patch:
+      operationId: accounts_api_v1_profile_partial_update
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProfile'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+  /accounts/api/v1/profile/bookmarks/:
+    get:
+      operationId: accounts_api_v1_profile_bookmarks_list
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostBookmark'
+          description: ''
+  /accounts/api/v1/registration/:
+    post:
+      operationId: accounts_api_v1_registration_create
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Registration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Registration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Registration'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Registration'
+          description: ''
+  /accounts/api/v1/unfollow/{user_id}/:
+    post:
+      operationId: accounts_api_v1_unfollow_create
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /advertisements/api/v1/advertisements/:
+    get:
+      operationId: advertisements_api_v1_advertisements_retrieve
+      tags:
+      - advertisements
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/notifications/:
+    get:
+      operationId: api_v1_notifications_list
+      description: Handle GET requests to retrieve notifications.
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/notifications/{id}/:
+    get:
+      operationId: api_v1_notifications_retrieve
+      description: Handle GET requests to retrieve a specific notification.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/notifications/{id}/read/:
+    put:
+      operationId: api_v1_notifications_read_update
+      description: API view to mark a notification as read.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Notification'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+    patch:
+      operationId: api_v1_notifications_read_partial_update
+      description: API view to mark a notification as read.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotification'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /posts/api/v2/:
+    get:
+      operationId: posts_api_v2_list
+      parameters:
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+          description: ''
+    post:
+      operationId: posts_api_v2_create
+      tags:
+      - posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Post'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Post'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Post'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+          description: ''
+  /posts/api/v2/author/{slug}/posts/:
+    get:
+      operationId: posts_api_v2_author_posts_list
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+          description: ''
+  /posts/api/v2/comment/{comment_id}/like/:
+    post:
+      operationId: posts_api_v2_comment_like_create
+      description: |-
+        ToggleCommentLikeAPIView allows users to like or unlike a comment.
+        - If created is True, a new like was added.
+        - If created is False, the like already existed and is removed.
+      parameters:
+      - in: path
+        name: comment_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /posts/api/v2/feed/:
+    get:
+      operationId: posts_api_v2_feed_list
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+          description: ''
+  /posts/api/v2/post/{slug}/:
+    get:
+      operationId: posts_api_v2_post_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+          description: ''
+    put:
+      operationId: posts_api_v2_post_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Post'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Post'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Post'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+          description: ''
+    patch:
+      operationId: posts_api_v2_post_partial_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPost'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPost'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPost'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+          description: ''
+  /posts/api/v2/post/{slug}/bookmark-toggle/:
+    post:
+      operationId: posts_api_v2_post_bookmark_toggle_create
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /posts/api/v2/post/{slug}/comment/{comment_id}/:
+    get:
+      operationId: posts_api_v2_post_comment_retrieve
+      parameters:
+      - in: path
+        name: comment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostComment'
+          description: ''
+    put:
+      operationId: posts_api_v2_post_comment_update
+      parameters:
+      - in: path
+        name: comment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostComment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PostComment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostComment'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostComment'
+          description: ''
+    patch:
+      operationId: posts_api_v2_post_comment_partial_update
+      parameters:
+      - in: path
+        name: comment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPostComment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPostComment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPostComment'
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostComment'
+          description: ''
+    delete:
+      operationId: posts_api_v2_post_comment_destroy
+      parameters:
+      - in: path
+        name: comment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /posts/api/v2/post/{slug}/comments/:
+    get:
+      operationId: posts_api_v2_post_comments_list
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostComment'
+          description: ''
+    post:
+      operationId: posts_api_v2_post_comments_create
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostComment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PostComment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostComment'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostComment'
+          description: ''
+  /posts/api/v2/post/{slug}/like/:
+    post:
+      operationId: posts_api_v2_post_like_create
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: posts_api_v2_post_like_destroy
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    ActivationResend:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Category name
+          maxLength: 100
+      required:
+      - id
+      - name
+    ChangePassword:
+      type: object
+      properties:
+        old_password:
+          type: string
+        new_password1:
+          type: string
+        new_password:
+          type: string
+      required:
+      - new_password
+      - new_password1
+      - old_password
+    CustomTokenObtain:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - email
+      - password
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        notification_type:
+          allOf:
+          - $ref: '#/components/schemas/NotificationTypeEnum'
+          description: |-
+            Type of notification
+
+            * `FOLLOW` - Follow
+            * `COMMENT` - Comment
+            * `COMMENT_LIKE` - Comment Like
+            * `LIKE` - Like
+            * `PUBLISH` - Post Published
+        actor_email:
+          type: string
+          readOnly: true
+        post_title:
+          type: string
+          readOnly: true
+        read:
+          type: boolean
+          description: Whether the notification has been read
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Date created
+      required:
+      - actor_email
+      - created_at
+      - id
+      - notification_type
+      - post_title
+    NotificationTypeEnum:
+      enum:
+      - FOLLOW
+      - COMMENT
+      - COMMENT_LIKE
+      - LIKE
+      - PUBLISH
+      type: string
+      description: |-
+        * `FOLLOW` - Follow
+        * `COMMENT` - Comment
+        * `COMMENT_LIKE` - Comment Like
+        * `LIKE` - Like
+        * `PUBLISH` - Post Published
+    PatchedNotification:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        notification_type:
+          allOf:
+          - $ref: '#/components/schemas/NotificationTypeEnum'
+          description: |-
+            Type of notification
+
+            * `FOLLOW` - Follow
+            * `COMMENT` - Comment
+            * `COMMENT_LIKE` - Comment Like
+            * `LIKE` - Like
+            * `PUBLISH` - Post Published
+        actor_email:
+          type: string
+          readOnly: true
+        post_title:
+          type: string
+          readOnly: true
+        read:
+          type: boolean
+          description: Whether the notification has been read
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Date created
+    PatchedPost:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          title: Post title
+          maxLength: 250
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        author:
+          allOf:
+          - $ref: '#/components/schemas/Profile'
+          readOnly: true
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+          readOnly: true
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+          readOnly: true
+        description:
+          type: string
+          writeOnly: true
+        description_display:
+          type: string
+          readOnly: true
+        short_description:
+          type: string
+          readOnly: true
+        reading_time:
+          type: integer
+          readOnly: true
+          title: Reading time (minutes)
+        img:
+          type: string
+          format: uri
+          nullable: true
+          title: Post image
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        is_featured:
+          type: boolean
+          title: Featured
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostComment'
+          readOnly: true
+        likes:
+          type: integer
+          readOnly: true
+        views:
+          type: integer
+          readOnly: true
+        publish_time:
+          type: string
+          format: date-time
+          nullable: true
+          title: Scheduled Publish Time
+          description: If set and status is 'scheduled', will be published automatically
+            at this time
+    PatchedPostComment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: string
+          readOnly: true
+        content:
+          type: string
+          title: Comment content
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        parent:
+          type: integer
+          nullable: true
+        post:
+          type: integer
+          readOnly: true
+    PatchedProfile:
+      type: object
+      properties:
+        email:
+          type: string
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        full_name:
+          type: string
+          maxLength: 1000
+        bio:
+          type: string
+          maxLength: 100
+        image:
+          type: string
+          format: uri
+          nullable: true
+        user_posts:
+          type: string
+          readOnly: true
+        user_likes:
+          type: string
+          readOnly: true
+        user_comments:
+          type: string
+          readOnly: true
+        followers:
+          type: string
+          readOnly: true
+        following:
+          type: string
+          readOnly: true
+        premium_status:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          title: Post title
+          maxLength: 250
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        author:
+          allOf:
+          - $ref: '#/components/schemas/Profile'
+          readOnly: true
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+          readOnly: true
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+          readOnly: true
+        description:
+          type: string
+          writeOnly: true
+        description_display:
+          type: string
+          readOnly: true
+        short_description:
+          type: string
+          readOnly: true
+        reading_time:
+          type: integer
+          readOnly: true
+          title: Reading time (minutes)
+        img:
+          type: string
+          format: uri
+          nullable: true
+          title: Post image
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        is_featured:
+          type: boolean
+          title: Featured
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostComment'
+          readOnly: true
+        likes:
+          type: integer
+          readOnly: true
+        views:
+          type: integer
+          readOnly: true
+        publish_time:
+          type: string
+          format: date-time
+          nullable: true
+          title: Scheduled Publish Time
+          description: If set and status is 'scheduled', will be published automatically
+            at this time
+      required:
+      - author
+      - categories
+      - comments
+      - created_at
+      - description
+      - description_display
+      - id
+      - likes
+      - reading_time
+      - short_description
+      - slug
+      - status
+      - tags
+      - title
+      - updated_at
+      - views
+    PostBookmark:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: string
+          readOnly: true
+        post:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - post
+      - user
+    PostComment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: string
+          readOnly: true
+        content:
+          type: string
+          title: Comment content
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        parent:
+          type: integer
+          nullable: true
+        post:
+          type: integer
+          readOnly: true
+      required:
+      - content
+      - created_at
+      - id
+      - post
+      - user
+    Profile:
+      type: object
+      properties:
+        email:
+          type: string
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        full_name:
+          type: string
+          maxLength: 1000
+        bio:
+          type: string
+          maxLength: 100
+        image:
+          type: string
+          format: uri
+          nullable: true
+        user_posts:
+          type: string
+          readOnly: true
+        user_likes:
+          type: string
+          readOnly: true
+        user_comments:
+          type: string
+          readOnly: true
+        followers:
+          type: string
+          readOnly: true
+        following:
+          type: string
+          readOnly: true
+        premium_status:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - bio
+      - created_at
+      - email
+      - followers
+      - following
+      - full_name
+      - premium_status
+      - slug
+      - updated_at
+      - user_comments
+      - user_likes
+      - user_posts
+    Registration:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 128
+        password1:
+          type: string
+          writeOnly: true
+          maxLength: 128
+        full_name:
+          type: string
+          maxLength: 255
+      required:
+      - email
+      - full_name
+      - password
+      - password1
+    StatusEnum:
+      enum:
+      - draft
+      - scheduled
+      - published
+      - archived
+      type: string
+      description: |-
+        * `draft` - Draft
+        * `scheduled` - Scheduled
+        * `published` - Published
+        * `archived` - Archived
+    Tag:
+      type: object
+      properties:
+        name:
+          type: string
+          title: Tag name
+          maxLength: 30
+      required:
+      - name
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenVerify:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+      required:
+      - token
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

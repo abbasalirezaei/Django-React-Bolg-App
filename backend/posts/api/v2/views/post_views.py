@@ -14,10 +14,10 @@ from drf_yasg.utils import swagger_auto_schema
 
 from datetime import timedelta
 from django.utils import timezone
-
+from django.db.models import Count
 
 # local imports
-from ..serializers.post_serializers import (PostSerializer,)
+from ..serializers.post_serializers import (PostSerializer,PostListSerializer)
 from ..permissions import IsAuthorOrReadOnly, WeeklyPostLimit, WeeklyPostBookmarkLimit
 
 from posts.api.utils import get_client_ip
@@ -40,6 +40,18 @@ class PostListAPIView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+class TopViewedPostsAPIView(generics.ListAPIView):
+    serializer_class = PostListSerializer
+
+    def get_queryset(self):
+        return Post.objects.order_by('-view_count')[:10]
+
+class TopCommentedPostsAPIView(generics.ListAPIView):
+    serializer_class = PostListSerializer
+
+    def get_queryset(self):
+        return Post.objects.annotate(num_comments=Count('comments')).order_by('-num_comments')[:10]
 
 
 class PostDetailAPIView(generics.RetrieveUpdateAPIView):

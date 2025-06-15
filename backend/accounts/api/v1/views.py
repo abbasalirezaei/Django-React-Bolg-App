@@ -170,7 +170,7 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
     permission_classes = [IsAuthenticated]
-
+    swagger_tags = ['profile']
     def get_object(self):
         return get_object_or_404(self.queryset, user=self.request.user)
 
@@ -179,7 +179,7 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
 
 class FollowUserView(APIView):
     permission_classes = [IsAuthenticated]
-
+    swagger_tags = ['follow']
     def post(self, request, user_id):
         try:
             user_to_follow = User.objects.get(id=user_id)
@@ -202,7 +202,7 @@ class FollowUserView(APIView):
 
 class UnfollowUserView(APIView):
     permission_classes = [IsAuthenticated]
-
+    swagger_tags = ['follow']
     def post(self, request, user_id):
         try:
             user_to_unfollow = User.objects.get(id=user_id)
@@ -221,6 +221,7 @@ class UnfollowUserView(APIView):
 
 
 class FollowerListView(APIView):
+    swagger_tags = ['follow']
     def get(self, request, user_id):
         try:
             user = User.objects.get(id=user_id)
@@ -232,6 +233,7 @@ class FollowerListView(APIView):
 
 
 class FollowingListView(APIView):
+    swagger_tags = ['follow']
     def get(self, request, user_id):
         try:
             user = User.objects.get(id=user_id)
@@ -244,6 +246,7 @@ class FollowingListView(APIView):
 
 # bookmarks
 class UserBookmarksAPIView(generics.ListAPIView):
+    swagger_tags = ['bookmarks']
     serializer_class = PostBookmarkSerializer
     permission_classes = [IsAuthenticated]
 

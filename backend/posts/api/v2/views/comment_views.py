@@ -20,14 +20,23 @@ from posts.models import (
 
 User = get_user_model()
 
+
+
+
+
+
+
+
+
 class CommentListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = PostCommentSerializer
-
+    swagger_tags = ['post-comments']
     def get_queryset(self):
         post_slug = self.kwargs.get('slug')
         post = get_object_or_404(Post, slug=post_slug, status=Post.PostStatus.PUBLISHED)
         return PostComment.objects.filter(post=post).order_by('-created_at')
-
+        
+    @swagger_auto_schema(tags=['posts-comments'])
     def perform_create(self, serializer):
         post = get_object_or_404(Post, slug=self.kwargs['slug'], status=Post.PostStatus.PUBLISHED)
         serializer.save(post=post, user=self.request.user)
@@ -35,8 +44,7 @@ class CommentListCreateAPIView(generics.ListCreateAPIView):
 
 class CommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PostCommentSerializer
-    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
+    swagger_tags = ['post-comments']
     def get_queryset(self):
         return PostComment.objects.all()
 
@@ -56,7 +64,7 @@ class ToggleCommentLikeAPIView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(tags=['comments-likes'])
+    swagger_tags = ['comment-likes']
     def post(self, request, comment_id):
         comment = get_object_or_404(PostComment, id=comment_id)
 

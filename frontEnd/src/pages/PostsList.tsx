@@ -11,8 +11,7 @@ import {
 } from '@/components/ui/pagination';
 import { postsAPI } from '../api/api';
 
-// مپ نویسنده‌ها و دسته‌ها (مثال)
-// اگر API جدا داری، می‌تونی اینها رو از API بگیری و در state ذخیره کنی
+
 const authorsMap = {
     1: 'Alex Thompson',
     2: 'Sarah Johnson',
@@ -68,7 +67,7 @@ const PostsList = () => {
         try {
             setLoading(true);
             const response = await postsAPI.getPosts();
-            // فقط فیلدهای لازم رو نگه دار و تبدیل کن
+        
             const mappedPosts = response.data.map(mapPostData);
             setPosts(mappedPosts);
             setLoading(false);
@@ -82,12 +81,12 @@ const PostsList = () => {
         fetchPosts();
     }, []);
 
-    // فیلتر بر اساس دسته
+  
     const filteredPosts = posts.filter(
         (post) => selectedCategory === 'all' || post.category === selectedCategory
     );
 
-    // مرتب سازی بر اساس تاریخ یا محبوبیت
+
     const sortedPosts = [...filteredPosts].sort((a, b) => {
         if (sortBy === 'popular') {
             return b.views - a.views;
