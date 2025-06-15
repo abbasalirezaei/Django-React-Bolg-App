@@ -45,13 +45,13 @@ class TopViewedPostsAPIView(generics.ListAPIView):
     serializer_class = PostListSerializer
 
     def get_queryset(self):
-        return Post.objects.order_by('-view_count')[:10]
+        return Post.objects.filter(status=Post.PostStatus.PUBLISHED).order_by('-view_count')[:3]
 
 class TopCommentedPostsAPIView(generics.ListAPIView):
     serializer_class = PostListSerializer
 
     def get_queryset(self):
-        return Post.objects.annotate(num_comments=Count('comments')).order_by('-num_comments')[:10]
+        return Post.objects.annotate(num_comments=Count('comments')).filter(status=Post.PostStatus.PUBLISHED).order_by('-num_comments')[:3]
 
 
 class PostDetailAPIView(generics.RetrieveUpdateAPIView):

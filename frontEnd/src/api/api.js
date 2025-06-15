@@ -37,6 +37,8 @@ export const profileAPI = {
 // Posts API calls
 export const postsAPI = {
   getPosts: () => api.get('/posts/api/v2/'),
+  getTopViewedPosts: () => api.get('/posts/api/v2/top-viewed/'),
+  getTopCommentedPosts: () => api.get('/posts/api/v2/top-commented/'),
   getPostDetail: (storeSlug) => api.get(`/posts/api/v2/post/${storeSlug}/`),
   getComments: (postSlug) => api.get(`/posts/api/v2/post/${postSlug}/comments/`),
   createComment: (postSlug, commentData) => api.post(`/posts/api/v2/post/${postSlug}/comments/`, commentData),

@@ -49,6 +49,7 @@ class PostListSerializer(serializers.ModelSerializer):
     views = serializers.IntegerField(read_only=True)
     comments_count = serializers.IntegerField(source="comments.count", read_only=True)
     short_description = serializers.CharField(read_only=True)
+    categories = CategorySerializer(many=True, read_only=True)
     author=serializers.SerializerMethodField()
 
     class Meta:
@@ -56,7 +57,7 @@ class PostListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'slug', 'author', 'img',
             'short_description', 'reading_time',
-            'likes', 'views', 'comments_count'
+            'likes', 'views', 'comments_count','categories','created_at'
         ]
     def get_author(self, obj):
         return obj.author.profile.full_name
