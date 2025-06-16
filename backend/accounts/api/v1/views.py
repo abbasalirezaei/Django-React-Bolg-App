@@ -186,7 +186,8 @@ class FollowUserView(APIView):
             if user_to_follow == request.user:
                 return Response({"error": "You cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
             if not user_to_follow.is_active:
-                return Response({"error": "User is not active yet."}, status=status.HTTP_400_BAD_REQUEST)   
+                return Response({"error": "User is not active yet."}, status=status.HTTP_400_BAD_REQUEST) 
+                  
             follow, created = Follow.objects.get_or_create(
                 from_user=request.user, to_user=user_to_follow)
             if not created:

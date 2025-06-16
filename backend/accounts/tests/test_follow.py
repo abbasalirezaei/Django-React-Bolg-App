@@ -1,14 +1,29 @@
-from accounts.models import Follow
-import pytest
 from rest_framework.test import APIClient
+
 
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
+import pytest
+import factory
+
+
+
 User = get_user_model()
+from accounts.models import Follow
+
+
+
+
+class UserFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = User
+    email = factory.Sequence(lambda n: f"testuser{n}@example.com")
+    password = "StrongPass123"
+    verified = True
+    is_active = True
 
 # Fixtures for reusability
-
 
 @pytest.fixture
 def api_client():
@@ -19,24 +34,24 @@ def api_client():
 @pytest.fixture
 def verified_active_user():
     """Create and return a verified, active user."""
-    user = User.objects.create_user(
-        email=f"testuser_{User.objects.count()}@example.com",
-        password="StrongPass123"
-    )
-    user.verified = True
-    user.is_active = True
-    user.save()
+    user = UserFactory()
     return user
 
+@pytest.mark.django_db
+def test_unauthenticated_user_cannot_follow(api_client, verified_active_user):
+    """Test that unauthenticated users cannot follow."""
+    to_user = verified_active_user
+    url = reverse("follow:follow-user", kwargs={"user_id": to_user.id})
+    response = api_client.post(url)
+    assert response.status_code == 401
+    assert response.data.get("detail") == "Authentication credentials were not provided."    
+    
 
 @pytest.mark.django_db
 def test_user_can_follow_another_user(api_client, verified_active_user):
     """Test that a user can follow another user."""
     from_user = verified_active_user
-    to_user = User.objects.create_user(
-        email="testuser2@example.com",
-        password="StrongPass123"
-    )
+    to_user = UserFactory()
     to_user.verified = True
     to_user.is_active = True
     to_user.save()
@@ -64,10 +79,7 @@ def test_user_can_unfollow_another_user(api_client, verified_active_user):
     """Test that a user can unfollow another user."""
 
     from_user = verified_active_user
-    to_user = User.objects.create_user(
-        email="testuser2@example.com",
-        password="StrongPass123"
-    )
+    to_user = UserFactory()
     # Create a follow relationship
     Follow.objects.create(from_user=from_user, to_user=to_user)
 
@@ -112,18 +124,50 @@ def test_user_can_not_follow_slef(api_client, verified_active_user):
 def test_user_cannot_follow_inactive_user(api_client, verified_active_user):
     """Test that a user cannot follow an inactive user."""
     from_user = verified_active_user
-    to_user = User.objects.create_user(
-        email="inactive@example.com",
-        password="StrongPass123",
-        verified=True,
-        is_active=False
-    )
+    to_user = UserFactory()
+    to_user.verified = True
+    to_user.is_active = False
+    to_user.save()
     
     api_client.force_authenticate(user=from_user)
     
     url = reverse("follow:follow-user", kwargs={"user_id": to_user.id})
     response = api_client.post(url)
     
-    assert response.status_code == 400  # Bad Request
-    assert "User is not active yet.".lower() in response.data.get("error", "").lower()  # Adjust based on your error message
+    assert response.status_code == 400  
+    assert "User is not active yet."in response.data.get("error", "") 
     assert not Follow.objects.filter(from_user=from_user, to_user=to_user).exists()
+
+
+
+@pytest.mark.django_db
+def test_user_can_not_follow_non_exist_user(api_client,verified_active_user):
+    """Test that a user cannot follow a non exist user."""
+    from_user=verified_active_user
+    
+    # Authenticate the client
+    api_client.force_authenticate(user=from_user)
+    
+    # Send follow request
+    url=reverse("follow:follow-user",kwargs={"user_id":1000})
+    response=api_client.post(url)
+    
+    # Verify response
+    assert response.status_code==404   
+    # Verify response message
+    assert response.data.get("error")=="User not found."
+
+
+@pytest.mark.django_db
+def test_user_cannot_follow_twice(api_client, verified_active_user):
+    """Test that a user cannot follow the same user twice."""
+    from_user = verified_active_user
+    to_user = UserFactory() 
+    Follow.objects.create(from_user=from_user, to_user=to_user)
+    
+    api_client.force_authenticate(user=from_user)
+    url = reverse("follow:follow-user", kwargs={"user_id": to_user.id})
+    response = api_client.post(url)
+    
+    assert response.status_code == 400
+    assert Follow.objects.filter(from_user=from_user, to_user=to_user).count() == 1
