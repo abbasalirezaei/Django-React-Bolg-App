@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.db.models import Count
 
 # local imports
-from ..serializers.post_serializers import (PostSerializer,PostListSerializer)
+from ..serializers.post_serializers import (PostSerializer, PostListSerializer)
 from ..permissions import IsAuthorOrReadOnly, WeeklyPostLimit, WeeklyPostBookmarkLimit
 
 from posts.api.utils import get_client_ip
@@ -29,7 +29,7 @@ User = get_user_model()
 
 
 class PostListAPIView(generics.ListCreateAPIView):
-    serializer_class = PostSerializer
+    serializer_class = PostListSerializer
     queryset = Post.objects.filter(status=Post.PostStatus.PUBLISHED)
     permission_classes = [
         IsAuthorOrReadOnly,
@@ -37,18 +37,23 @@ class PostListAPIView(generics.ListCreateAPIView):
     ]
     filter_backends = [SearchFilter]
     search_fields = ['title', 'description']
+    swagger_tags = ['posts-list']
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+
 class TopViewedPostsAPIView(generics.ListAPIView):
     serializer_class = PostListSerializer
+    swagger_tags = ['posts-list']
 
     def get_queryset(self):
         return Post.objects.filter(status=Post.PostStatus.PUBLISHED).order_by('-view_count')[:3]
 
+
 class TopCommentedPostsAPIView(generics.ListAPIView):
     serializer_class = PostListSerializer
+    swagger_tags = ['posts-list']
 
     def get_queryset(self):
         return Post.objects.annotate(num_comments=Count('comments')).filter(status=Post.PostStatus.PUBLISHED).order_by('-num_comments')[:3]
@@ -71,9 +76,9 @@ class PostDetailAPIView(generics.RetrieveUpdateAPIView):
 
 
 class AuthorPostsAPIView(generics.ListAPIView):
-    serializer_class = PostSerializer
+    serializer_class = PostListSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-
+    swagger_tags = ['posts-list']
     def get_queryset(self):
         profile_slug = self.kwargs.get("slug")
         profile = get_object_or_404(Profile, slug=profile_slug)
@@ -88,7 +93,7 @@ class AuthorPostsAPIView(generics.ListAPIView):
 class FeedAPIView(generics.ListAPIView):
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]
-
+    swagger_tags = ['posts-list']
     def get_queryset(self):
         # list of users that the current user is following
         list_of_following = Follow.objects.filter(
@@ -96,7 +101,7 @@ class FeedAPIView(generics.ListAPIView):
         # if the user is not following anyone, return no posts
         if not list_of_following:
             return Post.objects.none()
-        # filter posts from those users that are published 
+        # filter posts from those users that are published
         qs = Post.objects.filter(
             author__in=list_of_following,
             status=Post.PostStatus.PUBLISHED

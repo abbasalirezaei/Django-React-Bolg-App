@@ -171,6 +171,7 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
     queryset = Profile.objects.all()
     permission_classes = [IsAuthenticated]
     swagger_tags = ['profile']
+
     def get_object(self):
         return get_object_or_404(self.queryset, user=self.request.user)
 
@@ -180,14 +181,15 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
 class FollowUserView(APIView):
     permission_classes = [IsAuthenticated]
     swagger_tags = ['follow']
+
     def post(self, request, user_id):
         try:
             user_to_follow = User.objects.get(id=user_id)
             if user_to_follow == request.user:
                 return Response({"error": "You cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
             if not user_to_follow.is_active:
-                return Response({"error": "User is not active yet."}, status=status.HTTP_400_BAD_REQUEST) 
-                  
+                return Response({"error": "User is not active yet."}, status=status.HTTP_400_BAD_REQUEST)
+
             follow, created = Follow.objects.get_or_create(
                 from_user=request.user, to_user=user_to_follow)
             if not created:
@@ -205,6 +207,7 @@ class FollowUserView(APIView):
 class UnfollowUserView(APIView):
     permission_classes = [IsAuthenticated]
     swagger_tags = ['follow']
+
     def post(self, request, user_id):
         try:
             user_to_unfollow = User.objects.get(id=user_id)
@@ -223,7 +226,9 @@ class UnfollowUserView(APIView):
 
 
 class FollowerListView(APIView):
+    permission_classes = [IsAuthenticated]  
     swagger_tags = ['follow']
+
     def get(self, request, user_id):
         try:
             user = User.objects.get(id=user_id)
@@ -235,7 +240,9 @@ class FollowerListView(APIView):
 
 
 class FollowingListView(APIView):
+    permission_classes = [IsAuthenticated]
     swagger_tags = ['follow']
+
     def get(self, request, user_id):
         try:
             user = User.objects.get(id=user_id)
